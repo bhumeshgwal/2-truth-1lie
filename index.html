@@ -383,12 +383,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 
 <!-- ═══════════════ LEADERBOARD ═══════════════ -->
 <div class="screen" id="lbScreen">
-  <div class="lb-full-title">🏆 FINAL STANDINGS</div>
+  <div class="lb-full-title">🏆 STANDINGS</div>
+<div id="lb-round-title" style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.2em;color:var(--neon);text-align:center;margin-bottom:8px;"></div>
   <div class="lb-full-list" id="lbFullList"></div>
   <div style="width:100%;max-width:500px;display:flex;flex-direction:column;gap:8px;padding-bottom:30px;">
     <button class="btn btn-gold btn-full btn-big" onclick="submitAllToForm()">📊 Submit to Google Form</button>
     <button class="btn btn-ghost btn-full" onclick="exportCSV()">📥 Export CSV</button>
-    <button class="btn btn-fire btn-full btn-big" onclick="nextRound()">⏭ Play Another Round</button>
+    <button class="btn btn-fire btn-full btn-big" id="nextRoundBtn" onclick="nextRound()">⚡ NEXT ROUND — MEDIUM</button>
     <button class="btn btn-danger btn-full" onclick="resetGameFull()">🔄 Full Reset</button>
   </div>
 </div>
@@ -581,7 +582,7 @@ let G={
   hintUsed:false, hintKey:null,
   poll:null, pollRevealed:false,
   deltas:{},   // {name: delta} for live lb display
-  srTimer:null // start-round countdown interval
+  ssrTimer:null, gameRound:1
 };
 
 /* ═══ LOCALSTORAGE ═══ */
@@ -632,7 +633,7 @@ function startGame(){
   G.formUrl=document.getElementById('formUrl').value.trim();
   G.players.forEach(p=>{p.pts=0;p.used=false;p.chalCount=0;});
   G.usedIdx={easy:[],medium:[],hard:[],extreme:[]};
-  G.round=0;G.phase='idle';G.deltas={};
+  G.round=0;G.phase='idle';G.deltas={};G.gameRound=1;G.diff='easy';
   save();showScreen('slotScreen');doSpin();
 }
 
@@ -1080,14 +1081,34 @@ function showLeaderboard(){
   showScreen('lbScreen');clearInterval(G.timerInt);G.phase='idle';save();
   const sorted=[...G.players].sort((a,b)=>b.pts-a.pts);
   const me=['🥇','🥈','🥉'],cl=['lbf1','lbf2','lbf3'];
+  const roundLabel={1:'ROUND 1 — EASY',2:'ROUND 2 — MEDIUM',3:'ROUND 3 — HARD',4:'ROUND 4 — EXTREME ★ FINAL'};
+  const nextLabel={1:'⚡ NEXT ROUND — MEDIUM',2:'⚡ NEXT ROUND — HARD',3:'⚡ NEXT ROUND — EXTREME'};
+  document.getElementById('lb-round-title').textContent=roundLabel[G.gameRound]||'FINAL';
   document.getElementById('lbFullList').innerHTML=sorted.map((p,i)=>`
     <div class="lb-full-item ${cl[i]||''}">
       <div class="lbf-rank">${me[i]||'#'+(i+1)}</div>
-      <div><div class="lbf-name">${p.name}</div><div style="font-size:.62rem;color:var(--dim);">Challenges: ${p.chalCount}</div></div>
+      <div>
+        <div class="lbf-name">${p.name}</div>
+        <div style="font-size:.62rem;color:var(--dim);">Challenges: ${p.chalCount}</div>
+      </div>
       <div class="lbf-pts">${p.pts}</div>
     </div>`).join('');
+  const nb=document.getElementById('nextRoundBtn');
+  if(G.gameRound<4){
+    nb.style.display='block';
+    nb.textContent=nextLabel[G.gameRound];
+  }else{
+    nb.style.display='none';
+  }
+}f
+function nextRound(){
+  const diffOrder=['easy','medium','hard','extreme'];
+  G.gameRound=Math.min(4,G.gameRound+1);
+  G.diff=diffOrder[G.gameRound-1];
+  G.players.forEach(p=>{p.used=false;p.chalCount=0;});
+  G.round=0;G.deltas={};
+  save();showScreen('slotScreen');doSpin();
 }
-function nextRound(){G.players.forEach(p=>{p.used=false;p.chalCount=0;});G.round=0;G.deltas={};save();showScreen('slotScreen');doSpin();}
 function resetGameFull(){
   if(!confirm('Reset everything?'))return;
   localStorage.removeItem(LS);
