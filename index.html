@@ -113,7 +113,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 .stmt.lie-r{border-color:rgba(255,0,60,.5);background:rgba(255,0,60,.08);cursor:default;}
 .stmt.removed{opacity:.35;pointer-events:none;position:relative;}
 .stmt.removed::after{content:'✗ NOT THE LIE';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.1em;color:var(--neon);background:rgba(0,255,224,.08);border-radius:13px;border:1px solid rgba(0,255,224,.3);}
-.stmt-letter{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--fire);min-width:24px;line-height:1.1;}
+.stmt-letter{font-family:'Bebas Neue',sans-serif;font-size:1.95rem;color:var(--fire);min-width:36px;line-height:1.1;}
 .stmt-body{flex:1;}
 .stmt-text{font-size:.9rem;font-weight:600;line-height:1.45;}
 .reveal-tag{display:inline-block;margin-top:5px;padding:2px 10px;border-radius:999px;font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
@@ -266,12 +266,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
     </div>
   </div>
   <div class="card">
-    <div class="card-title">👥 Players</div>
-    <div class="row">
-      <input type="text" class="inp" id="nameInp" placeholder="Add player name..." onkeydown="if(event.key==='Enter')addPlayer()"/>
-      <button class="btn btn-fire" onclick="addPlayer()">ADD</button>
-    </div>
-    <div class="plist" id="playersList"><div style="color:var(--dim);font-size:.8rem;text-align:center;padding:8px;">No players yet</div></div>
+    <div class="card-title">👥 Players — Auto Loaded & Randomized</div>
+    <div class="plist" id="playersList"></div>
   </div>
   <div class="card">
     <div class="card-title">⏱️ Timer Per Round</div>
@@ -628,12 +624,15 @@ function renderSetupPlayers(){
   el.innerHTML=G.players.map((p,i)=>`<div class="pitem"><div style="font-weight:700;font-size:.88rem;">${p.name}${p.pts>0?' <span style="font-family:Share Tech Mono;font-size:.7rem;color:var(--neon);">'+p.pts+'</span>':''}</div><button class="pbtn" onclick="removeSetupPlayer(${i})">✕</button></div>`).join('');
 }
 function startGame(){
-  if(G.players.length<2){toast('Add at least 2 players!','error');return;}
   G.timerDur=parseInt(document.getElementById('timerSec').value)||60;
   G.formUrl=document.getElementById('formUrl').value.trim();
-  G.players.forEach(p=>{p.pts=0;p.used=false;p.chalCount=0;});
+  const names=['Chandrashekhar','Priyanka','Rajeev','Prapti','Laxmi','Sakshi','Bhanu','Vishal'];
+  // Shuffle names randomly
+  for(let i=names.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[names[i],names[j]]=[names[j],names[i]];}
+  G.players=names.map(n=>({name:n,pts:0,used:false,chalCount:0}));
   G.usedIdx={easy:[],medium:[],hard:[],extreme:[]};
   G.round=0;G.phase='idle';G.deltas={};G.gameRound=1;G.diff='easy';
+  renderSetupPlayers();
   save();showScreen('slotScreen');doSpin();
 }
 
@@ -1109,7 +1108,7 @@ function showLeaderboard(){
   }else{
     nb.style.display='none';
   }
-}f
+}
 function nextRound(){
   const diffOrder=['easy','medium','hard','extreme'];
   G.gameRound=Math.min(4,G.gameRound+1);
@@ -1175,6 +1174,11 @@ function escQ(s){return s.replace(/'/g,"\\'");}
     renderSetupPlayers();
     document.getElementById('timerSec').value=G.timerDur||60;
     document.getElementById('formUrl').value=G.formUrl||'';
+    if(G.gameRound>1){
+      const roundLabel={1:'EASY',2:'MEDIUM',3:'HARD',4:'EXTREME'};
+      document.getElementById('savedCard').querySelector('.saved-notice').textContent=
+        '💾 Session restored — Round '+G.gameRound+' ('+roundLabel[G.gameRound]+') · Players & scores saved!';
+    }
   }
   // Init audio context on first tap
   document.addEventListener('touchstart',()=>ac(),{once:true,passive:true});
