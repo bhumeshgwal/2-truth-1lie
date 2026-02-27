@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>2 Truths 1 Lie</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+:root{--fire:#ff4d00;--gold:#ffd700;--neon:#00ffe0;--void:#06080f;--card:#0d1117;--border:rgba(255,255,255,.08);--text:#f0f0f0;--dim:rgba(240,240,240,.4);--green:#00ff64;--red:#ff003c;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;background:var(--void);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(255,77,0,.16),transparent 60%),radial-gradient(ellipse 50% 40% at 90% 90%,rgba(0,255,224,.08),transparent 50%);}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:55px 55px;}
+.screen{position:relative;z-index:1;display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ─ SETUP ─ */
+#setupScreen{padding:20px;gap:16px;align-items:center;}
+.logo-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,10vw,4.5rem);letter-spacing:.18em;background:linear-gradient(135deg,var(--fire),var(--gold),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:.7rem;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;margin-top:2px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;width:100%;max-width:540px;}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.12em;color:var(--fire);margin-bottom:12px;}
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.dbtn{padding:10px;border-radius:10px;border:1.5px solid;font-family:'Bebas Neue',sans-serif;font-size:.9rem;cursor:pointer;background:transparent;transition:all .2s;}
+.d-easy{border-color:rgba(0,255,100,.35);color:var(--green);}.d-easy.on{background:rgba(0,255,100,.15);}
+.d-med{border-color:rgba(255,200,0,.35);color:#ffc800;}.d-med.on{background:rgba(255,200,0,.15);}
+.d-hard{border-color:rgba(255,120,0,.35);color:#ff7800;}.d-hard.on{background:rgba(255,120,0,.15);}
+.d-ext{border-color:rgba(255,0,60,.35);color:var(--red);}.d-ext.on{background:rgba(255,0,60,.15);}
+.row{display:flex;gap:8px;margin-bottom:10px;}
+.inp{flex:1;padding:10px 13px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.9rem;}
+.inp:focus{outline:none;border-color:rgba(255,77,0,.5);}.inp::placeholder{color:var(--dim);}
+.btn{padding:10px 18px;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.08em;cursor:pointer;border:none;transition:all .18s;white-space:nowrap;}
+.btn:active{transform:scale(.97);}
+.btn-fire{background:var(--fire);color:#fff;}.btn-fire:hover{background:#ff6633;}
+.btn-neon{background:transparent;border:1.5px solid var(--neon);color:var(--neon);}
+.btn-gold{background:transparent;border:1.5px solid var(--gold);color:var(--gold);}
+.btn-hint{background:rgba(255,215,0,.1);border:1.5px solid rgba(255,215,0,.4);color:var(--gold);}
+.btn-hint.used{opacity:.4;pointer-events:none;}
+.btn-ghost{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--dim);font-family:'Rajdhani',sans-serif;}
+.btn-danger{background:rgba(255,0,60,.1);border:1px solid rgba(255,0,60,.3);color:var(--red);font-family:'Rajdhani',sans-serif;}
+.btn-full{width:100%;text-align:center;display:block;}
+.btn-big{padding:14px;font-size:1.1rem;border-radius:13px;}
+.btn-xl{padding:18px;font-size:1.3rem;border-radius:14px;letter-spacing:.12em;}
+.plist{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;}
+.pitem{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);}
+.pbtn{width:28px;height:28px;border-radius:6px;border:none;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(255,0,60,.15);color:var(--red);}
+.saved-notice{font-size:.78rem;color:var(--neon);padding:10px 14px;border-radius:10px;background:rgba(0,255,224,.06);border:1px solid rgba(0,255,224,.2);margin-bottom:10px;}
+
+/* ─ SLOT ─ */
+#slotScreen{align-items:center;justify-content:center;padding:20px;gap:24px;}
+.slot-machine{width:min(420px,92vw);border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#1a0800,#080300);border:3px solid #ff5500;box-shadow:0 0 50px rgba(255,85,0,.35),inset 0 0 40px rgba(0,0,0,.6);}
+.slot-top{padding:10px 14px 6px;display:flex;justify-content:space-between;align-items:center;}
+.slot-top-label{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.15em;color:var(--gold);}
+.slot-lights{display:flex;gap:6px;}
+.sl{width:12px;height:12px;border-radius:50%;}
+.sl1{background:#ff4400;box-shadow:0 0 8px #ff4400;animation:bl .4s infinite alternate;}
+.sl2{background:var(--gold);box-shadow:0 0 8px var(--gold);animation:bl .4s .15s infinite alternate;}
+.sl3{background:var(--neon);box-shadow:0 0 8px var(--neon);animation:bl .4s .3s infinite alternate;}
+@keyframes bl{from{opacity:.25}to{opacity:1}}
+.slot-window{margin:0 10px;background:#000;border-radius:12px;border:2px solid #ff4400;height:110px;overflow:hidden;position:relative;}
+.slot-window::before,.slot-window::after{content:'';position:absolute;left:0;right:0;height:32px;z-index:2;pointer-events:none;}
+.slot-window::before{top:0;background:linear-gradient(#000,transparent);}
+.slot-window::after{bottom:0;background:linear-gradient(transparent,#000);}
+.slot-selector{position:absolute;top:50%;left:0;right:0;height:56px;transform:translateY(-50%);z-index:1;border-top:2px solid var(--fire);border-bottom:2px solid var(--fire);background:rgba(255,77,0,.07);}
+.slot-reel{position:absolute;width:100%;top:28px;}
+.slot-item{height:56px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#fff;padding:0 12px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.slot-item.winner{color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.5);}
+.slot-bottom{padding:8px 14px 12px;display:flex;justify-content:space-between;}
+.slot-coin{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;color:var(--gold);opacity:.7;}
+.winner-box{text-align:center;display:none;}
+.winner-box.show{display:block;animation:popIn .5s cubic-bezier(.175,.885,.32,1.275);}
+@keyframes popIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+.winner-name-big{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,12vw,5.5rem);letter-spacing:.06em;line-height:1;background:linear-gradient(135deg,var(--fire),var(--gold),#fff,var(--gold));background-size:300%;animation:shimmer 2s linear infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+@keyframes shimmer{0%{background-position:0%}100%{background-position:300%}}
+
+/* ─ START ROUND SCREEN ─ */
+#startScreen{align-items:center;justify-content:center;padding:20px;gap:20px;}
+.sr-up-next{font-size:.65rem;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;}
+.sr-player{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,14vw,7rem);text-align:center;background:linear-gradient(135deg,var(--fire),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.sr-msg{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.15em;color:var(--neon);text-align:center;}
+.sr-countdown{font-family:'Bebas Neue',sans-serif;font-size:clamp(5rem,22vw,12rem);color:var(--gold);line-height:1;transition:transform .1s;text-shadow:0 0 40px rgba(255,215,0,.4);}
+.sr-countdown.pulse{animation:cPulse .25s ease;}
+@keyframes cPulse{0%{transform:scale(1.3)}100%{transform:scale(1)}}
+.sr-hint{font-size:.7rem;color:var(--dim);text-align:center;}
+
+/* ─ GAME ─ */
+#gameScreen{padding:0;}
+.game-inner{display:flex;flex-direction:column;min-height:100vh;}
+.game-hdr{padding:12px 16px 10px;background:rgba(6,8,15,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(10px);position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;}
+.game-hdr-logo{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.12em;background:linear-gradient(135deg,var(--fire),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.level-badge{font-family:'Bebas Neue',sans-serif;font-size:.8rem;padding:4px 14px;border-radius:999px;border:1px solid;}
+.badge-easy{background:rgba(0,255,100,.1);border-color:rgba(0,255,100,.4);color:var(--green);}
+.badge-medium{background:rgba(255,200,0,.1);border-color:rgba(255,200,0,.4);color:#ffc800;}
+.badge-hard{background:rgba(255,120,0,.1);border-color:rgba(255,120,0,.4);color:#ff7800;}
+.badge-extreme{background:rgba(255,0,60,.12);border-color:rgba(255,0,60,.5);color:var(--red);animation:pulsered 1.5s infinite;}
+@keyframes pulsered{0%,100%{box-shadow:0 0 0 0 rgba(255,0,60,.4)}50%{box-shadow:0 0 0 8px rgba(255,0,60,0)}}
+.player-card{margin:14px 16px 0;border-radius:18px;background:rgba(255,77,0,.07);border:1.5px solid rgba(255,77,0,.3);padding:14px 18px;text-align:center;}
+.pc-label{font-size:.6rem;letter-spacing:.22em;color:var(--fire);text-transform:uppercase;font-weight:700;}
+.pc-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,8vw,3.5rem);letter-spacing:.06em;line-height:1;background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.pc-pts{font-family:'Share Tech Mono',monospace;font-size:.95rem;color:var(--neon);margin-top:3px;}
+.timer-wrap{text-align:center;margin:10px 0 4px;}
+.timer-val{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,10vw,5rem);letter-spacing:.1em;line-height:1;transition:color .3s;}
+.t-normal{color:var(--neon);}.t-warn{color:var(--gold);}.t-danger{color:var(--fire);animation:pt .5s infinite alternate;}
+@keyframes pt{from{opacity:1}to{opacity:.4}}
+.timer-lbl{font-size:.58rem;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;}
+.phase-label{text-align:center;margin:6px 16px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:var(--gold);}
+.stmts{margin:8px 16px;display:flex;flex-direction:column;gap:8px;}
+.stmt-title{font-size:.58rem;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;text-align:center;margin-bottom:3px;}
+.stmt{border-radius:13px;background:rgba(255,255,255,.03);border:1.5px solid var(--border);padding:12px 14px;cursor:pointer;transition:all .3s;display:flex;align-items:flex-start;gap:10px;}
+.stmt.selectable:hover{border-color:rgba(255,215,0,.4);background:rgba(255,215,0,.05);}
+.stmt.selected{border-color:var(--gold);background:rgba(255,215,0,.08);}
+.stmt.truth-r{border-color:rgba(0,255,100,.5);background:rgba(0,255,100,.08);cursor:default;}
+.stmt.lie-r{border-color:rgba(255,0,60,.5);background:rgba(255,0,60,.08);cursor:default;}
+.stmt.removed{opacity:.35;pointer-events:none;position:relative;}
+.stmt.removed::after{content:'✗ NOT THE LIE';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.1em;color:var(--neon);background:rgba(0,255,224,.08);border-radius:13px;border:1px solid rgba(0,255,224,.3);}
+.stmt-letter{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--fire);min-width:24px;line-height:1.1;}
+.stmt-body{flex:1;}
+.stmt-text{font-size:.9rem;font-weight:600;line-height:1.45;}
+.reveal-tag{display:inline-block;margin-top:5px;padding:2px 10px;border-radius:999px;font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
+.tag-t{background:rgba(0,255,100,.15);color:var(--green);border:1px solid rgba(0,255,100,.3);}
+.tag-l{background:rgba(255,0,60,.15);color:var(--red);border:1px solid rgba(255,0,60,.3);}
+.explain-box{margin:0 16px 8px;padding:10px 14px;border-radius:12px;background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.2);font-size:.8rem;color:var(--gold);line-height:1.5;}
+
+/* AUDIENCE POLL */
+.poll-section{margin:8px 16px;border-radius:14px;background:rgba(0,255,224,.04);border:1px solid rgba(0,255,224,.15);overflow:hidden;}
+.poll-btn{width:100%;padding:10px 16px;background:transparent;border:none;color:var(--neon);font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.1em;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;}
+.poll-chart{padding:10px 16px 14px;display:none;}
+.poll-chart.open{display:block;animation:sUp .3s ease;}
+.poll-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.poll-label{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--fire);min-width:20px;}
+.poll-bar-wrap{flex:1;height:22px;background:rgba(255,255,255,.05);border-radius:999px;overflow:hidden;}
+.poll-bar{height:100%;border-radius:999px;transition:width 1s ease;background:linear-gradient(90deg,rgba(0,255,224,.5),rgba(0,255,224,.2));}
+.poll-pct{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--text);min-width:36px;text-align:right;}
+.poll-note{font-size:.62rem;color:var(--dim);text-align:center;margin-top:4px;}
+
+/* HINT */
+.hint-section{margin:4px 16px 0;display:flex;gap:8px;align-items:center;}
+.hint-info{font-size:.68rem;color:var(--dim);flex:1;}
+
+/* CHALLENGER */
+.chal-section{margin:6px 16px 8px;border-radius:14px;background:rgba(0,255,224,.05);border:1px solid rgba(0,255,224,.2);padding:12px;display:none;}
+.chal-section.show{display:block;animation:sUp .3s ease;}
+@keyframes sUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.chal-sec-title{font-size:.62rem;letter-spacing:.2em;color:var(--neon);text-transform:uppercase;font-weight:700;margin-bottom:10px;}
+.chal-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
+.chal-chip{padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--border);font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.chal-chip:hover{background:rgba(0,255,224,.1);border-color:rgba(0,255,224,.4);color:var(--neon);}
+.chal-chip.sel{background:rgba(0,255,224,.15);border-color:var(--neon);color:var(--neon);}
+.chal-answer-area{display:none;margin-top:8px;}
+.chal-answer-area.show{display:block;}
+.chal-answer-label{font-size:.68rem;color:var(--dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em;}
+
+/* LIVE LEADERBOARD */
+.mini-lb{margin:10px 16px 0;}
+.mini-lb-title{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.15em;color:var(--gold);margin-bottom:6px;text-align:center;}
+.lb-item{display:flex;align-items:center;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:4px;position:relative;overflow:hidden;}
+.lb-item.r1{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.25);}
+.lb-item.r2{background:rgba(192,192,192,.06);border-color:rgba(192,192,192,.15);}
+.lb-item.r3{background:rgba(205,127,50,.06);border-color:rgba(205,127,50,.15);}
+.lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;min-width:30px;color:var(--dim);}
+.lb-rank.g{color:var(--gold);}.lb-rank.s{color:#c0c0c0;}.lb-rank.b{color:#cd7f32;}
+.lb-name{flex:1;font-weight:700;font-size:.85rem;}
+.lb-pts{font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--neon);}
+.lb-delta{font-family:'Share Tech Mono',monospace;font-size:.72rem;padding:1px 6px;border-radius:5px;margin-left:5px;font-weight:700;animation:deltaFade 3s forwards;}
+@keyframes deltaFade{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+.delta-pos{background:rgba(0,255,100,.15);color:var(--green);}
+.delta-neg{background:rgba(255,0,60,.15);color:var(--red);}
+
+.action-area{padding:10px 16px;display:flex;flex-direction:column;gap:8px;}
+.qset-progress{text-align:center;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--dim);padding:3px 0;}
+
+/* LEADERBOARD SCREEN */
+#lbScreen{padding:20px;align-items:center;gap:12px;}
+.lb-full-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,8vw,3.5rem);letter-spacing:.18em;background:linear-gradient(135deg,var(--fire),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;margin-top:16px;}
+.lb-full-list{width:100%;max-width:500px;display:flex;flex-direction:column;gap:8px;}
+.lb-full-item{display:flex;align-items:center;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.02);border:1px solid var(--border);}
+.lbf1{background:rgba(255,215,0,.09)!important;border-color:rgba(255,215,0,.35)!important;}
+.lbf2{background:rgba(192,192,192,.07)!important;border-color:rgba(192,192,192,.2)!important;}
+.lbf3{background:rgba(205,127,50,.07)!important;border-color:rgba(205,127,50,.2)!important;}
+.lbf-rank{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;min-width:50px;color:var(--dim);}
+.lbf-name{flex:1;font-weight:700;font-size:1rem;}
+.lbf-pts{font-family:'Share Tech Mono',monospace;font-size:1.2rem;color:var(--neon);}
+
+/* ─ OVERLAYS ─ */
+/* Score Flash */
+.score-flash{position:fixed;inset:0;z-index:999;display:none;align-items:center;justify-content:center;pointer-events:none;}
+.score-flash.show{display:flex;animation:sfAnim .85s forwards;}
+@keyframes sfAnim{0%{opacity:0;transform:scale(.3)}25%{opacity:1;transform:scale(1.4)}70%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(.7)}}
+.sf-text{font-family:'Bebas Neue',sans-serif;font-size:clamp(5rem,18vw,10rem);}
+.sf-plus{color:var(--green);text-shadow:0 0 50px rgba(0,255,100,.6);}
+.sf-minus{color:var(--red);text-shadow:0 0 50px rgba(255,0,60,.6);}
+
+/* Challenger Result Overlay */
+#chalResultOverlay{position:fixed;inset:0;z-index:970;background:rgba(0,0,0,.87);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:20px;}
+#chalResultOverlay.show{display:flex;animation:popIn .4s ease;}
+.chal-res-icon{font-size:4.5rem;animation:iconBounce .5s .3s ease both;}
+@keyframes iconBounce{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1) rotate(0)}}
+.chal-res-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,10vw,4.5rem);letter-spacing:.1em;}
+.chal-res-sub{font-size:1rem;font-weight:700;letter-spacing:.1em;}
+.chal-res-pts{font-family:'Share Tech Mono',monospace;font-size:1.8rem;margin-top:6px;}
+
+/* Hammer Overlay */
+#hammerOverlay{position:fixed;inset:0;z-index:975;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;}
+#hammerOverlay.show{display:flex;}
+.hammer-label{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--fire);}
+.hammer-score{font-family:'Bebas Neue',sans-serif;font-size:clamp(5rem,22vw,11rem);line-height:1;transition:color .3s;}
+.hammer-emoji{font-size:4rem;display:none;transform-origin:top center;}
+.hammer-emoji.swing{display:block;animation:hammerSwing .5s ease-out;}
+@keyframes hammerSwing{0%{transform:rotate(-120deg) translateY(-40px)}60%{transform:rotate(20deg) translateY(10px)}100%{transform:rotate(0deg) translateY(0)}}
+.hammer-crack{animation:crack .3s ease;}
+@keyframes crack{0%{transform:scale(1)}30%{transform:scale(1.3) rotate(-3deg)}60%{transform:scale(.9) rotate(2deg)}100%{transform:scale(1)}}
+.hammer-new{font-family:'Bebas Neue',sans-serif;font-size:2rem;display:none;color:var(--fire);}
+.hammer-desc{font-size:.75rem;color:var(--dim);}
+
+/* Toast */
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-8px);z-index:990;opacity:0;transition:all .22s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-inner{padding:9px 20px;border-radius:999px;font-weight:700;font-size:.82rem;font-family:'Rajdhani',sans-serif;white-space:nowrap;}
+
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:999px;}
+</style>
+</head>
+<body>
+
+<!-- OVERLAYS -->
+<div class="score-flash" id="scoreFlash"><div class="sf-text" id="sfText"></div></div>
+<div class="toast" id="toast"><div class="toast-inner" id="toastInner"></div></div>
+
+<!-- CHALLENGER RESULT -->
+<div id="chalResultOverlay">
+  <div class="chal-res-icon" id="crIcon"></div>
+  <div class="chal-res-title" id="crTitle"></div>
+  <div class="chal-res-sub" id="crSub"></div>
+  <div class="chal-res-pts" id="crPts"></div>
+</div>
+
+<!-- HAMMER OVERLAY -->
+<div id="hammerOverlay">
+  <div class="hammer-label">💡 HINT PENALTY — 30% DEDUCTED</div>
+  <div class="hammer-score" id="hammerScore" style="color:var(--gold);"></div>
+  <div class="hammer-emoji" id="hammerEmoji">🔨</div>
+  <div class="hammer-new" id="hammerNew"></div>
+  <div class="hammer-desc" id="hammerDesc"></div>
+</div>
+
+<!-- ═══════════════ SETUP ═══════════════ -->
+<div class="screen active" id="setupScreen">
+  <div style="text-align:center;padding:24px 0 10px;">
+    <div class="logo-title">2 TRUTHS 1 LIE</div>
+    <div class="logo-sub">Live Cognition Challenge</div>
+  </div>
+  <div class="card" id="savedCard" style="display:none;">
+    <div class="saved-notice">💾 Previous session restored — players &amp; scores saved!</div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn btn-fire btn-full" onclick="resumeGame()">▶ RESUME</button>
+      <button class="btn btn-danger" onclick="clearSaved()">🗑 CLEAR ALL</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚡ Difficulty</div>
+    <div class="diff-grid">
+      <button class="dbtn d-easy on" id="d-easy"   onclick="setDiff('easy')">EASY +10pts</button>
+      <button class="dbtn d-med"    id="d-medium"  onclick="setDiff('medium')">MEDIUM +20pts</button>
+      <button class="dbtn d-hard"   id="d-hard"    onclick="setDiff('hard')">HARD +30pts</button>
+      <button class="dbtn d-ext"    id="d-extreme" onclick="setDiff('extreme')">EXTREME +40pts</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">👥 Players</div>
+    <div class="row">
+      <input type="text" class="inp" id="nameInp" placeholder="Add player name..." onkeydown="if(event.key==='Enter')addPlayer()"/>
+      <button class="btn btn-fire" onclick="addPlayer()">ADD</button>
+    </div>
+    <div class="plist" id="playersList"><div style="color:var(--dim);font-size:.8rem;text-align:center;padding:8px;">No players yet</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">⏱️ Timer Per Round</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <input type="number" class="inp" id="timerSec" value="60" min="10" max="300" style="max-width:90px;"/>
+      <span style="font-size:.8rem;color:var(--dim);">seconds</span>
+    </div>
+  </div>
+  <div class="card" style="border-color:rgba(0,255,224,.15);">
+    <div class="card-title" style="color:var(--neon);">📊 Google Form (optional)</div>
+    <input type="text" class="inp" id="formUrl" placeholder="https://docs.google.com/forms/...formResponse"/>
+    <div style="margin-top:6px;font-size:.67rem;color:var(--dim);">Fields: Name (entry.1), Points (entry.2), Rank (entry.3)</div>
+  </div>
+  <div style="width:100%;max-width:540px;padding-bottom:24px;">
+    <button class="btn btn-fire btn-xl btn-full" onclick="startGame()">🚀 START FRESH GAME</button>
+  </div>
+</div>
+
+<!-- ═══════════════ SLOT ═══════════════ -->
+<div class="screen" id="slotScreen">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:24px;padding:20px;">
+    <div style="text-align:center;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(1.5rem,5vw,2.5rem);letter-spacing:.2em;color:var(--dim);">🎲 SELECTING PLAYER</div>
+      <div style="font-size:.7rem;letter-spacing:.25em;color:var(--dim);opacity:.6;margin-top:3px;">Round <span id="slotRoundNum">1</span></div>
+    </div>
+    <div class="slot-machine">
+      <div class="slot-top">
+        <div class="slot-top-label">LUCKY DRAW</div>
+        <div class="slot-lights"><div class="sl sl1"></div><div class="sl sl2"></div><div class="sl sl3"></div><div class="sl sl1"></div><div class="sl sl2"></div><div class="sl sl3"></div></div>
+      </div>
+      <div class="slot-window"><div class="slot-selector"></div><div class="slot-reel" id="slotReel"></div></div>
+      <div class="slot-bottom"><div class="slot-coin">🪙 2 TRUTHS 1 LIE</div><div class="slot-coin" id="slotCoin">SPINNING...</div></div>
+    </div>
+    <div class="winner-box" id="winnerBox">
+      <div style="font-size:.65rem;letter-spacing:.25em;color:var(--dim);text-transform:uppercase;">🎯 Selected</div>
+      <div class="winner-name-big" id="winnerName">—</div>
+      <div style="font-size:.85rem;letter-spacing:.2em;color:var(--neon);text-transform:uppercase;margin-top:6px;">Get Ready! 🔥</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ START ROUND ═══════════════ -->
+<div class="screen" id="startScreen">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;padding:24px;text-align:center;">
+    <div class="sr-up-next">🎤 UP NEXT</div>
+    <div class="sr-player" id="srPlayerName"></div>
+    <div class="sr-msg">PLEASE COME TO THE STAGE</div>
+    <div class="sr-countdown" id="srCountdown">5</div>
+    <div class="sr-hint">Round starts automatically · or tap below</div>
+    <button class="btn btn-neon" onclick="startRoundNow()" style="margin-top:8px;letter-spacing:.1em;">▶ START NOW</button>
+  </div>
+</div>
+
+<!-- ═══════════════ GAME ═══════════════ -->
+<div class="screen" id="gameScreen">
+<div class="game-inner">
+  <div class="game-hdr">
+    <div class="game-hdr-logo">2T1L</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--dim);">Round <span id="roundNum">1</span></div>
+    <div class="level-badge badge-easy" id="levelBadge">EASY</div>
+  </div>
+  <div class="player-card">
+    <div class="pc-label">Now Playing</div>
+    <div class="pc-name" id="pcName">—</div>
+    <div class="pc-pts" id="pcPts">0 pts</div>
+  </div>
+  <div class="timer-wrap">
+    <div class="timer-val t-normal" id="timerDisplay">60</div>
+    <div class="timer-lbl">seconds remaining</div>
+  </div>
+  <div class="phase-label" id="phaseLabel">Tap the statement you think is the LIE</div>
+
+  <!-- Audience Poll -->
+  <div class="poll-section" id="pollSection">
+    <button class="poll-btn" onclick="revealPoll()" id="pollBtn">📊 REVEAL AUDIENCE VOTE</button>
+    <div class="poll-chart" id="pollChart"></div>
+  </div>
+
+  <!-- Hint -->
+  <div class="hint-section" id="hintSection">
+    <button class="btn btn-hint" id="hintBtn" onclick="useHint()">🔍 USE HINT (−30% pts)</button>
+    <div class="hint-info">Removes 1 truth. If correct, you earn 70% of points.</div>
+  </div>
+
+  <div class="stmts" id="stmtsContainer"></div>
+  <div id="explainBox" class="explain-box" style="display:none;"></div>
+
+  <!-- Challenger -->
+  <div class="chal-section" id="chalSection">
+    <div class="chal-sec-title">⚔️ Challenger — Who wants to challenge?</div>
+    <div class="chal-chips" id="chalChips"></div>
+    <div class="chal-answer-area" id="chalAnswerArea">
+      <div class="chal-answer-label">Challenger <span id="chalNameLabel">—</span>: Pick the LIE</div>
+      <div class="stmts" id="chalStmts" style="margin:0;"></div>
+    </div>
+  </div>
+
+  <div class="action-area" id="actionArea"></div>
+
+  <!-- Live Leaderboard -->
+  <div class="mini-lb">
+    <div class="mini-lb-title">🏆 LIVE SCORES</div>
+    <div id="miniLb"></div>
+  </div>
+  <div class="qset-progress" id="qsetProgress"></div>
+  <div style="height:20px;"></div>
+</div>
+</div>
+
+<!-- ═══════════════ LEADERBOARD ═══════════════ -->
+<div class="screen" id="lbScreen">
+  <div class="lb-full-title">🏆 FINAL STANDINGS</div>
+  <div class="lb-full-list" id="lbFullList"></div>
+  <div style="width:100%;max-width:500px;display:flex;flex-direction:column;gap:8px;padding-bottom:30px;">
+    <button class="btn btn-gold btn-full btn-big" onclick="submitAllToForm()">📊 Submit to Google Form</button>
+    <button class="btn btn-ghost btn-full" onclick="exportCSV()">📥 Export CSV</button>
+    <button class="btn btn-fire btn-full btn-big" onclick="nextRound()">⏭ Play Another Round</button>
+    <button class="btn btn-danger btn-full" onclick="resetGameFull()">🔄 Full Reset</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   QUESTION BANK — 30 per difficulty
+═══════════════════════════════════════════ */
+const QB={
+easy:[
+{a:"Bananas are slightly radioactive because they contain natural potassium.",b:"Goldfish have only a three‑second memory and forget everything quickly.",c:"A sneeze can travel faster than 150 kilometers per hour.",lie:'b',ex:"Goldfish can remember things for months, not just a few seconds."},
+{a:"The human nose can remember more than a trillion different smells.",b:"Your fingernails grow faster in summer than in winter.",c:"Human blood is always blue inside the body and turns red outside.",lie:'c',ex:"Human blood is always red; veins look blue through the skin."},
+{a:"Some frogs can be frozen solid and still come back to life.",b:"Camels store water inside their humps like a water bottle.",c:"Octopus blood is blue because it uses copper instead of iron.",lie:'b',ex:"Camel humps store fat, not water; they handle dehydration differently."},
+{a:"Humans and giraffes have the same number of neck bones.",b:"Jellyfish have lived in Earth's oceans for over 500 million years.",c:"All snakes are deaf and cannot sense any vibrations at all.",lie:'c',ex:"Many snakes sense vibrations through their jaws and body."},
+{a:"Lightning is hotter than the surface of the Sun.",b:"A cockroach can live for days even after losing its head.",c:"The Great Wall of China is clearly visible from the Moon.",lie:'c',ex:"The wall is not easily visible from the Moon with the naked eye."},
+{a:"Some metals, like sodium, explode when they touch water.",b:"Earth's inner core is mostly solid iron and very hot.",c:"The Moon glows by burning like a giant fireball in space.",lie:'c',ex:"The Moon only reflects sunlight; it does not burn."},
+{a:"Dolphins give each other names using special whistle sounds.",b:"Bats are completely blind and cannot see anything at all.",c:"Some turtles can breathe through their bottoms in water.",lie:'b',ex:"Bats can see; they also use echolocation for navigation."},
+{a:"Your stomach acid is strong enough to dissolve a razor blade.",b:"Some lizards can detach their tails to escape enemies.",c:"Humans can survive in space without a suit for about one hour.",lie:'c',ex:"In space, humans die within minutes without a suit."},
+{a:"The Amazon rainforest makes about 20 percent of the world's oxygen.",b:"Polar bears actually have black skin under their white fur.",c:"Penguins live naturally at the North Pole with polar bears.",lie:'c',ex:"Penguins live in the Southern Hemisphere, not with polar bears."},
+{a:"Honey found in ancient Egyptian tombs is still safe to eat.",b:"Tomatoes are fruits scientifically, even though we cook them as vegetables.",c:"Drinking salty ocean water is the fastest way to rehydrate.",lie:'c',ex:"Ocean water dehydrates you; the salt content is too high."},
+{a:"Some mushrooms glow in the dark to attract insects.",b:"Sharks can smell a single drop of blood from many kilometers away.",c:"A day on Venus is longer than a year on Venus.",lie:'b',ex:"Sharks smell well but not magically from kilometers — statement C is actually true!"},
+{a:"A group of crows is called a murder of crows.",b:"Earth is closer to the Sun in summer than in winter.",c:"An ostrich's eye is bigger than its brain.",lie:'b',ex:"Seasons depend on Earth's tilt, not distance to Sun."},
+{a:"Some metals can remember their shape and return after bending.",b:"Sound travels faster in water than in air.",c:"The Sun is the largest star in the entire universe.",lie:'c',ex:"The Sun is huge, but many stars are much bigger."},
+{a:"A blue whale's tongue can weigh as much as an elephant.",b:"Glass flows slowly like a liquid and gets thicker at the bottom.",c:"Some insects can walk on water using surface tension.",lie:'b',ex:"Glass is a rigid solid; old panes are uneven for other reasons."},
+{a:"The hottest part of a candle flame is usually the blue region.",b:"The brain uses about 20 percent of the body's energy.",c:"Human hair stops growing completely once a person turns 40.",lie:'c',ex:"Hair continues growing throughout life, though speed can change."},
+{a:"Some snakes give birth to live young instead of laying eggs.",b:"Male seahorses carry the babies in a pouch until birth.",c:"All spiders spin webs to catch their food.",lie:'c',ex:"Many spiders hunt or jump; not all make classic webs."},
+{a:"Earth's atmosphere is mostly nitrogen, not oxygen.",b:"Sound cannot travel in space because there is no air.",c:"The Sun orbits around the Earth once every year.",lie:'c',ex:"Earth orbits the Sun, not the other way around."},
+{a:"Humans share about 98 percent of their DNA with chimpanzees.",b:"Your body has more bacterial cells than human cells.",c:"Human bones are weaker than concrete under compression.",lie:'c',ex:"Bone is surprisingly strong and can be stronger than concrete."},
+{a:"Cactus spines are actually modified leaves adapted for desert life.",b:"Venus is the brightest planet in our night sky.",c:"The dark side of the Moon never receives any sunlight.",lie:'c',ex:"All parts of the Moon receive sunlight at different times."},
+{a:"Some plants can eat insects and small animals.",b:"Earth is the only planet in our solar system with moons.",c:"Mars appears red because of iron‑rich dust on its surface.",lie:'b',ex:"Many planets, like Jupiter and Saturn, have multiple moons."},
+{a:"Owls can rotate their heads about 270 degrees around.",b:"Human brain cells can send signals faster than car speed on highways.",c:"Humans use only 10 percent of their brains; the rest is empty.",lie:'c',ex:"All parts of the brain have functions; 10 percent is a myth."},
+{a:"Some fish can climb waterfalls using their mouths and fins.",b:"Mercury is the hottest planet in our solar system.",c:"Certain jellyfish can revert to a younger stage and age backward.",lie:'b',ex:"Venus is hotter than Mercury due to thick greenhouse atmosphere."},
+{a:"A bolt of lightning can heat air hotter than a volcano.",b:"Rainbows can appear at night if the Moon is bright enough.",c:"You can see the Great Wall of China easily from any satellite photo.",lie:'c',ex:"It's hard to spot in most photos."},
+{a:"Some birds sleep while flying long distances over the ocean.",b:"Kangaroos cannot move their legs separately when hopping fast.",c:"All mammals lay eggs to reproduce their young.",lie:'c',ex:"Only a few mammals lay eggs; most give live birth."},
+{a:"The smell of freshly cut grass is a distress signal from the plant.",b:"Space smells like a mix of metal, barbecue, and burnt steak.",c:"You can hear explosions in space if they are very big.",lie:'c',ex:"Sound cannot travel in space without air."},
+{a:"Butterflies taste with their feet, not with a tongue.",b:"A day on Earth is getting very slightly longer over millions of years.",c:"The human tongue has separate map zones only for each taste.",lie:'c',ex:"All areas of the tongue can sense multiple basic tastes."},
+{a:"Some ants farm fungi as food inside their nests.",b:"Snails can sleep for years under dry, harsh conditions.",c:"Rain always contains the same amount of water in every raindrop.",lie:'c',ex:"Raindrops come in different sizes."},
+{a:"The coldest place in the known universe is a lab on Earth.",b:"Space stations orbit Earth at roughly 400 kilometers above the surface.",c:"Gravity completely disappears once you go beyond the atmosphere.",lie:'c',ex:"Gravity never disappears; it weakens with distance."},
+{a:"Some metals can be liquid at room temperature, like mercury.",b:"You weigh slightly less at the equator than at the poles.",c:"Water always boils at exactly 100 degrees everywhere on Earth.",lie:'c',ex:"Boiling point changes with air pressure and altitude."},
+{a:"A human can't tickle themselves because the brain predicts the touch.",b:"Some birds can see ultraviolet light invisible to humans.",c:"Earth's Moon is the only moon in the entire solar system.",lie:'c',ex:"Many other moons orbit planets like Jupiter and Saturn."}
+],
+medium:[
+{a:"DNA is shaped like a twisted ladder called a double helix.",b:"Viruses are considered fully living cells by all scientists.",c:"Red blood cells lose their nucleus when they mature.",lie:'b',ex:"Viruses are not considered fully living cells; they need hosts."},
+{a:"Ozone in the upper atmosphere protects us from harmful ultraviolet rays.",b:"Greenhouse gases trap heat and keep Earth warm enough for life.",c:"All radiation from the Sun is dangerous and must be completely blocked.",lie:'c',ex:"Some solar radiation is vital for life, like visible light."},
+{a:"Metals expand when heated because their particles move further apart.",b:"In a vacuum, a feather and a stone fall at the same speed.",c:"Gravity does not act on light because light has no mass.",lie:'c',ex:"Light is bent by gravity; massive objects curve space."},
+{a:"Plants release carbon dioxide at night during respiration.",b:"Plants only perform photosynthesis during the daytime.",c:"Plants stop respiring at night to save energy.",lie:'c',ex:"Plants respire all the time, day and night."},
+{a:"Earth's magnetic field helps protect us from charged particles from the Sun.",b:"Aurora lights form when charged particles hit gases high in the atmosphere.",c:"Without a magnetic field, Earth's gravity would suddenly disappear completely.",lie:'c',ex:"Gravity and magnetism are different; losing magnetic field won't remove gravity."},
+{a:"Insulin is a hormone that helps control the level of blood sugar.",b:"The pancreas produces digestive enzymes as well as hormones.",c:"All hormones are stored in special sacs called synapses between neurons.",lie:'c',ex:"Synapses are for nerve signals; hormones move through the blood."},
+{a:"The speed of light in vacuum is about 3 lakh kilometers per second.",b:"Nothing with mass can move faster than light in a vacuum.",c:"Sound can travel faster than light in vacuum under special conditions.",lie:'c',ex:"Light in vacuum is the ultimate speed limit; sound needs matter."},
+{a:"The Moon causes tides by pulling on Earth's oceans with gravity.",b:"When the Sun and Moon line up, tides become especially strong.",c:"Tides are caused only by the spinning of Earth, not by gravity.",lie:'c',ex:"Gravity from the Moon and Sun mainly causes tides."},
+{a:"Enzymes speed up chemical reactions inside living cells.",b:"Enzymes are used up and destroyed in every reaction they help.",c:"Each enzyme usually works best with a specific substrate.",lie:'b',ex:"Enzymes are not used up; they can be reused many times."},
+{a:"The atmosphere gets thinner as height increases above Earth's surface.",b:"Most weather happens in the lowest layer called the troposphere.",c:"Air pressure is highest at the top of a mountain.",lie:'c',ex:"Air pressure is highest at sea level."},
+{a:"White light is a mixture of many different colors of light.",b:"A prism separates white light because different colors bend differently.",c:"Black objects reflect all light and absorb none of it.",lie:'c',ex:"Black objects absorb most light."},
+{a:"Mitochondria are often called the powerhouses of the cell.",b:"In humans, all cells have the same shape and same function.",c:"Red blood cells are specially shaped to carry oxygen efficiently.",lie:'b',ex:"Different cells have different shapes and jobs."},
+{a:"Newton's third law says every action has an equal and opposite reaction.",b:"Rockets work in space by pushing against empty vacuum.",c:"Rockets accelerate by expelling hot gas backward at high speed.",lie:'b',ex:"Rockets push gas backward, not the vacuum."},
+{a:"A lunar eclipse happens when Earth comes between the Sun and the Moon.",b:"A solar eclipse happens when the Moon blocks sunlight from reaching Earth.",c:"Eclipses happen every month because the Moon always lines up perfectly.",lie:'c',ex:"The Moon's tilted orbit means perfect alignment is rare."},
+{a:"Fossil fuels come from ancient plants and animals buried for millions of years.",b:"Burning fossil fuels releases carbon dioxide into the atmosphere.",c:"Fossil fuels can be renewed in just a few human lifetimes.",lie:'c',ex:"Fossil fuels take millions of years to form."},
+{a:"A black hole's gravity is so strong that even light cannot escape.",b:"Time runs slower near very massive objects compared to far away.",c:"Black holes are huge empty holes with zero mass inside them.",lie:'c',ex:"Black holes are extremely dense masses, not empty holes."},
+{a:"Antibiotics can kill bacteria but do nothing against viruses.",b:"Overusing antibiotics can lead to antibiotic‑resistant bacteria.",c:"Taking antibiotics for every fever prevents resistance from developing.",lie:'c',ex:"Unnecessary use of antibiotics helps resistance to develop."},
+{a:"Metals are usually good conductors of both heat and electricity.",b:"Rubber and plastic are good electrical insulators.",c:"Pure water conducts electricity very well because of many free ions.",lie:'c',ex:"Pure water conducts poorly; dissolved salts make it conductive."},
+{a:"Carbon exists in forms like diamond and graphite, with very different properties.",b:"Graphite is soft and slippery because its layers slide over each other.",c:"Diamonds are soft because their carbon atoms move freely inside.",lie:'c',ex:"Diamond's atoms are locked tightly, making it very hard."},
+{a:"Plate tectonics explains earthquakes and movement of continents.",b:"Most earthquakes occur at boundaries where plates meet or slide.",c:"Earthquakes only happen when volcanoes erupt nearby.",lie:'c',ex:"Many earthquakes happen far from volcanoes, along plate faults."},
+{a:"Human eyes have light‑sensitive cells called rods and cones.",b:"Cones help in seeing color, while rods help in low light.",c:"In complete darkness, cones work better than rods for night vision.",lie:'c',ex:"Rods are more sensitive in low light, not cones."},
+{a:"A comet is mostly ice and dust, forming a tail near the Sun.",b:"An asteroid is mostly rock or metal, usually without a tail.",c:"Meteors are big icy bodies that orbit beyond Neptune only.",lie:'c',ex:"Meteors are small rocks burning up in Earth's atmosphere."},
+{a:"Saturated fats are usually solid at room temperature.",b:"Enamel on teeth is the hardest substance in the human body.",c:"The liver only stores bile; it does not perform any chemical reactions.",lie:'c',ex:"The liver carries out many chemical reactions and makes bile."},
+{a:"Light‑year is a unit of distance, not time.",b:"The Milky Way is our home galaxy containing billions of stars.",c:"A light‑year measures how long light takes to circle Earth once.",lie:'c',ex:"A light‑year is how far light travels in one year."},
+{a:"Diffusion is movement of particles from high to low concentration.",b:"Osmosis is diffusion of water through a partially permeable membrane.",c:"Osmosis can happen with any gas or solid, not just water.",lie:'c',ex:"Osmosis specifically refers to movement of water."},
+{a:"The Doppler effect explains why ambulance sirens change pitch as they pass.",b:"Light from galaxies moving away appears shifted toward red.",c:"The Doppler effect only works for sound, never for light.",lie:'c',ex:"Doppler effect applies to both sound and light."},
+{a:"Chloroplasts contain chlorophyll, which helps capture sunlight for photosynthesis.",b:"All plant cells contain chloroplasts, including root cells deep underground.",c:"Photosynthesis mainly occurs in green parts of the plant.",lie:'b',ex:"Roots usually lack chloroplasts since they get no light."},
+{a:"The human heart has four chambers to separate oxygenated and deoxygenated blood.",b:"Arteries generally carry blood away from the heart.",c:"All arteries carry oxygen‑poor blood, never oxygen‑rich blood.",lie:'c',ex:"Most arteries carry oxygen‑rich blood."},
+{a:"The greenhouse effect naturally keeps Earth warmer than it would be.",b:"Increasing greenhouse gases from industry is warming the planet more.",c:"Without any greenhouse effect, Earth would be hotter than Venus.",lie:'c',ex:"Without greenhouse effect, Earth would be much colder."},
+{a:"Radio waves, microwaves, and X‑rays are all electromagnetic waves.",b:"X‑rays have higher energy than visible light.",c:"Radio waves travel slower than visible light through empty space.",lie:'c',ex:"All electromagnetic waves move at the same speed in vacuum."}
+],
+hard:[
+{a:"DNA replication is semi‑conservative, keeping one original strand in each copy.",b:"Messenger RNA carries genetic instructions from nucleus to ribosomes.",c:"Transfer RNA stores genetic information permanently inside the nucleus.",lie:'c',ex:"tRNA helps bring amino acids; DNA stores genetic information."},
+{a:"ATP acts as the main energy currency in living cells.",b:"Mitochondria generate ATP mainly through aerobic respiration.",c:"Anaerobic respiration in humans produces only water and carbon dioxide.",lie:'c',ex:"Human anaerobic respiration produces lactic acid."},
+{a:"The rate of diffusion increases with higher temperature due to faster particles.",b:"Osmotic pressure depends on the concentration of solute particles.",c:"Osmosis can occur even if both sides have equal water potentials.",lie:'c',ex:"Osmosis requires a difference in water potential."},
+{a:"The myelin sheath speeds up nerve impulse conduction along axons.",b:"Synapses allow chemical signals to pass between neurons.",c:"Nerve impulses are simple flows of liquid through neural tubes.",lie:'c',ex:"Nerve impulses are electrical and chemical signals."},
+{a:"The coriolis effect influences wind patterns and ocean currents on Earth.",b:"Trade winds blow from subtropical high‑pressure zones toward the equator.",c:"Coriolis effect is caused by Earth's gravitational pull on the Moon.",lie:'c',ex:"Coriolis effect comes from Earth's rotation."},
+{a:"P‑type semiconductors have more holes than electrons as charge carriers.",b:"N‑type semiconductors have extra electrons as majority carriers.",c:"In a PN junction, current flows equally well both forward and reverse.",lie:'c',ex:"A PN junction allows easier current flow in forward bias."},
+{a:"Heisenberg's uncertainty principle limits how precisely position and momentum are known.",b:"Electrons show both particle and wave‑like behavior.",c:"In classical physics, the uncertainty principle is exactly the same effect.",lie:'c',ex:"The uncertainty principle is a quantum effect, not classical."},
+{a:"Redshift in distant galaxies suggests the universe is expanding over time.",b:"Cosmic microwave background is faint radiation left from the early universe.",c:"Steady state theory currently explains cosmic background radiation better than Big Bang.",lie:'c',ex:"Big Bang theory explains cosmic microwave background more successfully."},
+{a:"Enzymes lower the activation energy needed for chemical reactions.",b:"Competitive inhibitors bind to the enzyme's active site.",c:"Non‑competitive inhibitors always bind exactly at the enzyme's active site.",lie:'c',ex:"Non‑competitive inhibitors bind away from the active site."},
+{a:"Transpiration helps pull water upward through xylem in tall trees.",b:"Cohesion between water molecules assists continuous water columns in xylem.",c:"Phloem transports only water and minerals, never sugars or hormones.",lie:'c',ex:"Phloem carries sugars and some hormones."},
+{a:"pH is a logarithmic scale measuring hydrogen ion concentration.",b:"A solution with pH 3 is ten times more acidic than pH 4.",c:"A solution with pH 2 is twice as acidic as pH 4.",lie:'c',ex:"pH 2 is 100 times more acidic than pH 4."},
+{a:"Meiosis produces haploid gametes from diploid cells.",b:"Crossing‑over during meiosis increases genetic variation.",c:"Mitosis halves the chromosome number to create gametes.",lie:'c',ex:"Meiosis halves chromosome number; mitosis keeps it the same."},
+{a:"The photoelectric effect shows light behaves as particles called photons.",b:"Below a threshold frequency, no electrons are emitted regardless of intensity.",c:"Increasing light intensity below threshold gradually starts the photoelectric effect.",lie:'c',ex:"No electrons are emitted below threshold frequency."},
+{a:"Entropy is often described as a measure of disorder in a system.",b:"In an isolated system, total entropy tends to increase over time.",c:"Entropy of any closed system always decreases during spontaneous processes.",lie:'c',ex:"Spontaneous processes usually increase entropy."},
+{a:"The ozone hole is worst over Antarctica due to special winter conditions.",b:"Chlorofluorocarbons release chlorine that destroys ozone molecules.",c:"Ozone in the stratosphere warms Earth by trapping infrared radiation strongly.",lie:'c',ex:"Ozone mainly absorbs UV; greenhouse gases trap infrared."},
+{a:"Blood pressure is highest in arteries leaving the heart.",b:"Capillaries allow exchange of gases and nutrients with tissues.",c:"Veins have thicker muscular walls than arteries to handle high pressure.",lie:'c',ex:"Arteries have thicker walls; veins operate at lower pressure."},
+{a:"Polar covalent bonds arise when electrons are shared unequally between atoms.",b:"Water's polarity allows it to dissolve many ionic and polar substances.",c:"Non‑polar molecules like oil dissolve easily in water due to strong attraction.",lie:'c',ex:"Oil is non‑polar and does not mix with polar water."},
+{a:"The Haber process synthesizes ammonia from nitrogen and hydrogen gases.",b:"High pressure and an iron catalyst help improve ammonia yield.",c:"The Haber process removes carbon dioxide directly from the atmosphere.",lie:'c',ex:"Haber process makes ammonia; it doesn't remove CO₂."},
+{a:"Kepler's first law describes planetary orbits as ellipses with the Sun at one focus.",b:"Kepler's second law states planets sweep equal areas in equal times.",c:"Kepler's laws apply only to Earth's orbit, not to other planets.",lie:'c',ex:"Kepler's laws apply to all planets."},
+{a:"The kidney's nephron filters blood and forms urine.",b:"Glomerular filtration occurs under pressure inside Bowman's capsule.",c:"All glucose in the filtrate is normally lost in urine in healthy people.",lie:'c',ex:"Glucose is normally reabsorbed."},
+{a:"Natural selection favors organisms better adapted to their environment.",b:"Mutation introduces new genetic variations into populations.",c:"According to natural selection, individuals change their genes by trying harder.",lie:'c',ex:"Natural selection acts on random variations; effort doesn't change genes."},
+{a:"A catalyst changes the activation energy but not the overall energy change.",b:"Catalysts are not consumed in the chemical reaction they speed up.",c:"Catalysts shift the chemical equilibrium position permanently.",lie:'c',ex:"Catalysts speed up reaching equilibrium but don't change its position."},
+{a:"Nuclear fission splits heavy nuclei, releasing energy and neutrons.",b:"Nuclear fusion combines light nuclei, releasing huge amounts of energy.",c:"Commercial nuclear power plants currently run mainly on controlled fusion.",lie:'c',ex:"Present nuclear plants use fission; fusion is still experimental."},
+{a:"Synaptic transmission often uses neurotransmitters like acetylcholine.",b:"The refractory period prevents a nerve fiber from firing immediately again.",c:"During an action potential, sodium ions move out and potassium ions move in first.",lie:'c',ex:"Sodium ions move into the neuron first."},
+{a:"Gravitational potential energy near Earth depends on height and mass.",b:"In free fall without air resistance, all objects accelerate equally.",c:"Gravitational acceleration depends strongly on object's mass near Earth's surface.",lie:'c',ex:"Near Earth, gravity is almost independent of mass."},
+{a:"The refractive index of a medium compares light speed in vacuum to that medium.",b:"Light bends toward the normal when entering a denser medium from air.",c:"Light speed in glass can be faster than in vacuum.",lie:'c',ex:"Light is fastest in vacuum."},
+{a:"The lac operon in bacteria controls genes for lactose metabolism.",b:"Operons allow several genes to be controlled by one promoter.",c:"Operons are common gene structures in human nuclear DNA.",lie:'c',ex:"Operon structures are typical in prokaryotes."},
+{a:"Hemoglobin contains iron, which binds oxygen in red blood cells.",b:"Bohr effect describes how pH affects hemoglobin's oxygen binding.",c:"Hemoglobin carries no carbon dioxide; that is only carried by plasma water.",lie:'c',ex:"Hemoglobin also helps transport some carbon dioxide."},
+{a:"The second law of thermodynamics implies no heat engine is perfectly efficient.",b:"Carnot efficiency gives an ideal limit for heat engine performance.",c:"A real engine can reach or exceed Carnot efficiency with perfect engineering.",lie:'c',ex:"No real engine can exceed Carnot efficiency."},
+{a:"Adaptive immunity involves specific recognition of pathogens and memory cells.",b:"Vaccines train the immune system by exposing it to weakened or partial pathogens.",c:"Innate immunity creates long‑lasting memory cells after first exposure.",lie:'c',ex:"Immune memory belongs to adaptive, not innate, immunity."}
+],
+extreme:[
+{a:"Neutron stars pack more mass than the Sun into a city‑sized sphere.",b:"A teaspoon of neutron star material would weigh billions of tons on Earth.",c:"Neutron star gravity is gentle enough for humans to stand comfortably.",lie:'c',ex:"Gravity on a neutron star would instantly crush anything."},
+{a:"Some quantum particles can be entangled and affect each other instantly across space.",b:"Quantum teleportation moves entire objects like people from place to place today.",c:"Entanglement has been demonstrated over distances of hundreds of kilometers.",lie:'b',ex:"Quantum teleportation sends information, not whole objects."},
+{a:"There are more possible chess games than atoms in the observable universe.",b:"There are more ways to shuffle a deck of cards than stars in our galaxy.",c:"Observable universe contains fewer than one thousand galaxies in total.",lie:'c',ex:"There are hundreds of billions of galaxies."},
+{a:"Time runs more slowly on your feet than on your head due to gravity.",b:"GPS satellites must correct for time dilation to give accurate positions.",c:"Time always ticks at exactly the same rate everywhere, regardless of gravity.",lie:'c',ex:"Relativity shows time depends on gravity and speed."},
+{a:"Tardigrades can survive in space, radiation, and extreme temperatures.",b:"Some tardigrades survived being exposed to the vacuum of space.",c:"Tardigrades can survive inside active volcano lava for weeks.",lie:'c',ex:"Lava would destroy them very quickly."},
+{a:"Humans and bananas share about 50 to 60 percent of their genes.",b:"You share about 60 percent of your DNA with a chicken.",c:"Humans share zero genes with bacteria; all genes are completely different.",lie:'c',ex:"Many basic genes are shared across all life."},
+{a:"Quantum particles sometimes tunnel through energy barriers they shouldn't cross.",b:"Quantum tunneling is essential for the nuclear fusion that powers stars.",c:"Quantum tunneling allows humans to frequently walk through solid walls unnoticed.",lie:'c',ex:"For macroscopic objects, tunneling probability is effectively zero."},
+{a:"A cloud can weigh more than several million kilograms.",b:"A hurricane releases more energy than many nuclear bombs.",c:"A single raindrop weighs about as much as a medium‑sized rock.",lie:'c',ex:"Raindrops weigh only a fraction of a gram."},
+{a:"Some deep‑sea fish make their own light using bioluminescent chemicals.",b:"Fireflies produce light using a chemical reaction that is nearly heat‑free.",c:"Bioluminescence cannot be found in any marine organisms.",lie:'c',ex:"Many marine organisms are bioluminescent."},
+{a:"In some materials, electrons behave as if they split into separate parts.",b:"Graphene is a single layer of carbon atoms arranged in a hexagonal lattice.",c:"Graphene is thicker than a human hair by several millimeters.",lie:'c',ex:"Graphene is only one atom thick."},
+{a:"The largest known single living organism is a fungus spread over kilometers.",b:"Some mushrooms in Oregon are genetically the same individual over huge areas.",c:"No single organism can be larger than a blue whale in any sense.",lie:'c',ex:"Some fungal networks and aspen clones are larger than a whale."},
+{a:"A person's gut bacteria outnumber their own cells by at least one to one.",b:"Gut microbes can influence mood and behavior through chemical signals.",c:"Human health is completely unaffected by gut microbes.",lie:'c',ex:"Gut microbes strongly affect digestion, immunity, and mood."},
+{a:"The vacuum of space constantly creates and destroys virtual particle pairs.",b:"Hawking radiation comes from quantum effects near a black hole's event horizon.",c:"Hawking radiation has been directly measured coming from real astrophysical black holes.",lie:'c',ex:"Hawking radiation is predicted but not yet directly observed."},
+{a:"Some birds can see Earth's magnetic field to help them navigate.",b:"Migratory birds may sense magnetism using special molecules in their eyes.",c:"Humans have a fully developed magnetic sense equal to migrating birds.",lie:'c',ex:"Humans have no clear magnetic sense like birds."},
+{a:"A single lightning strike can heat air to around 30,000 degrees Celsius.",b:"Lightning can create glassy tubes in sand called fulgurites.",c:"Lightning always strikes only the highest point and never the same place twice.",lie:'c',ex:"Lightning can strike the same spot multiple times."},
+{a:"Some ants use living ant bridges made from their own bodies to cross gaps.",b:"Army ants can form living rafts to survive floods.",c:"Ant colonies are controlled by telepathic signals from the queen.",lie:'c',ex:"Ants communicate with chemicals and touch, not telepathy."},
+{a:"The universe might contain more planets than grains of sand on Earth.",b:"Rogue planets drift through space without orbiting any star.",c:"All planets must orbit a star; planet‑sized objects without stars cannot exist.",lie:'c',ex:"Rogue planets without stars have been detected."},
+{a:"Human eyes can detect a single photon under ideal conditions.",b:"Our brains usually block out such tiny signals as random noise.",c:"Under normal light, humans can see individual atoms with naked eyes.",lie:'c',ex:"Atoms are too small to be seen without instruments."},
+{a:"Some frogs can hold their pee for months while hibernating in winter.",b:"Certain desert frogs store water inside their bodies like living canteens.",c:"All frogs drink water only through their mouths like humans.",lie:'c',ex:"Many frogs absorb water through their skin."},
+{a:"There is a species of jellyfish considered biologically immortal under some conditions.",b:"Some planarian flatworms can regrow a complete body from tiny pieces.",c:"Human cells cannot divide at all after birth under any circumstances.",lie:'c',ex:"Many human cells, like skin and blood cells, divide throughout life."},
+{a:"Some metals become superconductors and carry current with zero resistance.",b:"Superconductors can make magnets float using the Meissner effect.",c:"Superconductors work perfectly at any warm room temperature today.",lie:'c',ex:"Most superconductors need very low temperatures."},
+{a:"Saturn's moon Titan has lakes and rivers of liquid methane and ethane.",b:"Venus has surface pressures high enough to crush many spacecraft.",c:"Titan's rivers are made of boiling liquid iron flowing under intense heat.",lie:'c',ex:"Titan is extremely cold; its lakes are mainly methane."},
+{a:"Human bodies constantly produce tiny amounts of antimatter.",b:"Positrons, the antimatter of electrons, can be detected coming from bananas.",c:"Antimatter falls upward in Earth's gravity, opposite to normal matter.",lie:'c',ex:"Current evidence suggests antimatter falls downward."},
+{a:"A day on Mercury is longer than its year.",b:"Mercury rotates so slowly that its solar day outlasts its orbit.",c:"Mercury's surface is covered with deep oceans of liquid mercury metal.",lie:'c',ex:"Mercury is rocky and airless; no liquid metal oceans."},
+{a:"Under high pressure, ice can become denser than liquid water.",b:"There are many different crystalline forms of ice besides normal ice.",c:"Ice always floats in water under every possible temperature and pressure.",lie:'c',ex:"At very high pressures, some ice forms can sink."},
+{a:"Some squid and octopus can instantly change color and texture of their skin.",b:"Cuttlefish can create moving color waves to confuse predators and prey.",c:"Cephalopods have color vision exactly like humans, using three color cones.",lie:'c',ex:"Many cephalopods may be color‑blind."},
+{a:"Your body contains atoms that were once inside ancient stars.",b:"Many of the elements in your body were formed in supernova explosions.",c:"Elements heavier than iron are impossible to form in stars.",lie:'c',ex:"Heavier elements are formed during supernovae."},
+{a:"Earth once had a Snowball Earth period when ice covered most of the planet.",b:"Mass extinctions have wiped out most species many times in Earth's history.",c:"Dinosaurs and humans lived together for millions of years before dinosaurs vanished.",lie:'c',ex:"Dinosaurs disappeared ~65 million years before humans."},
+{a:"Some plants can hear vibrations from caterpillars chewing and respond chemically.",b:"Plants send warning signals to neighbors through air and underground networks.",c:"Plants think with a brain‑like organ hidden in their roots.",lie:'c',ex:"Plants have signaling systems but no brain organ."},
+{a:"There are microorganisms living deep inside rocks kilometers below Earth's surface.",b:"Some bacteria can eat electricity directly from electrodes.",c:"No life can exist without sunlight anywhere in the universe.",lie:'c',ex:"Many deep‑sea and underground organisms live without sunlight."}
+]};
+
+/* ═══════════════════════════════════
+   AUDIO — Web Audio API
+═══════════════════════════════════ */
+let AC=null;
+function ac(){
+  if(!AC)try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  if(AC&&AC.state==='suspended')AC.resume();
+  return AC;
+}
+function tone(freq,dur,type,vol,delay){
+  const a=ac();if(!a)return;
+  const o=a.createOscillator(),g=a.createGain();
+  o.connect(g);g.connect(a.destination);
+  o.type=type||'sine';o.frequency.value=freq;
+  const t=a.currentTime+(delay||0);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vol||0.25,t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  o.start(t);o.stop(t+dur+0.05);
+}
+// Sound library
+const SND={
+  draw:()=>{for(let i=0;i<14;i++)tone(120+i*25,0.04,'square',0.08,i*0.055);},
+  challenge:()=>{[200,280,350,280,350,500].forEach((f,i)=>tone(f,0.13,'sawtooth',0.18,i*0.09));},
+  chalWin:()=>{[400,500,630,800,1000].forEach((f,i)=>tone(f,0.18,'sine',0.25,i*0.1));},
+  chalLose:()=>{[350,270,190,130].forEach((f,i)=>tone(f,0.22,'sawtooth',0.2,i*0.11));},
+  timerBeep:()=>tone(880,0.07,'square',0.22),
+  hammer:()=>{tone(55,0.5,'square',0.5);setTimeout(()=>tone(40,0.3,'sine',0.35),90);},
+  correct:()=>{[523,659,784,1047].forEach((f,i)=>tone(f,0.18,'sine',0.28,i*0.09));},
+  wrong:()=>{[320,240].forEach((f,i)=>tone(f,0.28,'sawtooth',0.22,i*0.13));},
+  countdown:()=>tone(660,0.09,'sine',0.28),
+  countdownFinal:()=>{[660,880].forEach((f,i)=>tone(f,0.15,'sine',0.3,i*0.12));},
+  hint:()=>{tone(440,0.12,'sine',0.2);setTimeout(()=>tone(330,0.12,'sine',0.15),130);},
+  poll:()=>tone(330,0.1,'sine',0.15),
+};
+
+/* ═══════════════════════════════════
+   STAGES + STATE
+═══════════════════════════════════ */
+const STAGES={
+  easy:   {name:'EASY',    pts:10,cP:5, cF:5},
+  medium: {name:'MEDIUM',  pts:20,cP:10,cF:10},
+  hard:   {name:'HARD',    pts:30,cP:15,cF:15},
+  extreme:{name:'EXTREME', pts:40,cP:20,cF:20},
+};
+const LS='2t1l_v3';
+
+let G={
+  diff:'easy', players:[], usedIdx:{easy:[],medium:[],hard:[],extreme:[]},
+  curPIdx:-1, curQIdx:-1, round:0, timerDur:60, timerVal:60, timerInt:null,
+  pAns:null, chalIdx:-1, chalAns:null, phase:'idle', formUrl:'',
+  hintUsed:false, hintKey:null,
+  poll:null, pollRevealed:false,
+  deltas:{},   // {name: delta} for live lb display
+  srTimer:null // start-round countdown interval
+};
+
+/* ═══ LOCALSTORAGE ═══ */
+function save(){
+  try{
+    const s={diff:G.diff,players:G.players,usedIdx:G.usedIdx,curPIdx:G.curPIdx,
+      curQIdx:G.curQIdx,round:G.round,timerDur:G.timerDur,timerVal:G.timerVal,
+      pAns:G.pAns,chalIdx:G.chalIdx,chalAns:G.chalAns,phase:G.phase,formUrl:G.formUrl,
+      hintUsed:G.hintUsed,hintKey:G.hintKey,poll:G.poll,pollRevealed:G.pollRevealed};
+    localStorage.setItem(LS,JSON.stringify(s));
+  }catch(e){}
+}
+function load(){
+  try{const r=localStorage.getItem(LS);if(!r)return false;const s=JSON.parse(r);
+    if(!s.players||!s.players.length)return false;Object.assign(G,s);return true;}
+  catch(e){return false;}
+}
+function clearSaved(){
+  if(!confirm('Clear all saved data?'))return;
+  localStorage.removeItem(LS);
+  Object.assign(G,{players:[],usedIdx:{easy:[],medium:[],hard:[],extreme:[]},round:0,curPIdx:-1,phase:'idle',diff:'easy',deltas:{}});
+  document.getElementById('savedCard').style.display='none';
+  renderSetupPlayers();toast('All data cleared!','error');
+}
+function resumeGame(){
+  if(G.phase==='idle'||G.curPIdx===-1){showScreen('slotScreen');doSpin();}
+  else{showScreen('gameScreen');rebuildGameScreen();}
+}
+
+/* ═══ SETUP ═══ */
+function setDiff(d){G.diff=d;['easy','medium','hard','extreme'].forEach(x=>document.getElementById('d-'+x).classList.toggle('on',x===d));}
+function addPlayer(){
+  const inp=document.getElementById('nameInp'),n=inp.value.trim();
+  if(!n){toast('Enter a name!','error');return;}
+  if(G.players.find(p=>p.name.toLowerCase()===n.toLowerCase())){toast('Already added!','error');return;}
+  G.players.push({name:n,pts:0,used:false,chalCount:0});inp.value='';
+  renderSetupPlayers();save();toast(n+' added!','success');
+}
+function removeSetupPlayer(i){G.players.splice(i,1);renderSetupPlayers();save();}
+function renderSetupPlayers(){
+  const el=document.getElementById('playersList');
+  if(!G.players.length){el.innerHTML='<div style="color:var(--dim);font-size:.8rem;text-align:center;padding:8px;">No players yet</div>';return;}
+  el.innerHTML=G.players.map((p,i)=>`<div class="pitem"><div style="font-weight:700;font-size:.88rem;">${p.name}${p.pts>0?' <span style="font-family:Share Tech Mono;font-size:.7rem;color:var(--neon);">'+p.pts+'</span>':''}</div><button class="pbtn" onclick="removeSetupPlayer(${i})">✕</button></div>`).join('');
+}
+function startGame(){
+  if(G.players.length<2){toast('Add at least 2 players!','error');return;}
+  G.timerDur=parseInt(document.getElementById('timerSec').value)||60;
+  G.formUrl=document.getElementById('formUrl').value.trim();
+  G.players.forEach(p=>{p.pts=0;p.used=false;p.chalCount=0;});
+  G.usedIdx={easy:[],medium:[],hard:[],extreme:[]};
+  G.round=0;G.phase='idle';G.deltas={};
+  save();showScreen('slotScreen');doSpin();
+}
+
+/* ═══ SLOT ═══ */
+function doSpin(){
+  const av=G.players.filter(p=>!p.used);
+  if(!av.length){showLeaderboard();return;}
+  G.round++;
+  document.getElementById('slotRoundNum').textContent=G.round;
+  SND.draw();
+  const pk=av[Math.floor(Math.random()*av.length)];
+  const names=G.players.map(p=>p.name);
+  const reel=document.getElementById('slotReel');
+  const rep=[];for(let i=0;i<25;i++)rep.push(...names);rep.push(pk.name);
+  const iH=56;reel.innerHTML=rep.map(n=>`<div class="slot-item" style="height:${iH}px;">${n}</div>`).join('');
+  reel.style.top='0px';
+  document.getElementById('winnerBox').classList.remove('show');
+  document.getElementById('slotCoin').textContent='SPINNING...';
+  const tot=rep.length-1,sl=tot-15;let st=0,sp=35;
+  function tick(){
+    st++;reel.style.top=(-st*iH+28)+'px';
+    if(st>=tot){
+      reel.querySelectorAll('.slot-item')[st]?.classList.add('winner');
+      document.getElementById('slotCoin').textContent='🎉 SELECTED!';
+      document.getElementById('winnerName').textContent=pk.name;
+      document.getElementById('winnerBox').classList.add('show');
+      SND.countdownFinal();
+      setTimeout(()=>showStartScreen(pk),1800);
+      return;
+    }
+    if(st>sl){const pg=(st-sl)/15;sp=35+Math.round(pg*250);}
+    setTimeout(tick,sp);
+  }
+  setTimeout(tick,sp);
+}
+
+/* ═══ START ROUND SCREEN ═══ */
+let _srPlayer=null;
+function showStartScreen(player){
+  _srPlayer=player;
+  showScreen('startScreen');
+  document.getElementById('srPlayerName').textContent=player.name;
+  let count=5;
+  document.getElementById('srCountdown').textContent=count;
+  clearInterval(G.srTimer);
+  G.srTimer=setInterval(()=>{
+    count--;
+    SND.countdown();
+    const el=document.getElementById('srCountdown');
+    el.textContent=count;
+    el.classList.remove('pulse');
+    void el.offsetWidth;
+    el.classList.add('pulse');
+    if(count<=0){clearInterval(G.srTimer);startRound(_srPlayer);}
+  },1000);
+}
+function startRoundNow(){clearInterval(G.srTimer);startRound(_srPlayer);}
+
+/* ═══ AUDIENCE POLL ═══ */
+function genPoll(lieKey){
+  const bias=Math.random()<0.5;
+  const keys=['a','b','c'];
+  if(bias){
+    const lie=30+Math.floor(Math.random()*25);
+    const rem=100-lie;
+    const o1=Math.max(5,Math.floor(Math.random()*(rem-10)));
+    const o2=rem-o1;
+    const others=keys.filter(k=>k!==lieKey);
+    const r={};r[lieKey]=lie;r[others[0]]=o1;r[others[1]]=o2;
+    return r;
+  }else{
+    let v=[],rem=100;
+    for(let i=0;i<2;i++){const x=8+Math.floor(Math.random()*(rem-20));v.push(x);rem-=x;}
+    v.push(rem);v.sort(()=>Math.random()-.5);
+    return {a:v[0],b:v[1],c:v[2]};
+  }
+}
+function revealPoll(){
+  if(G.pollRevealed) return;
+  G.pollRevealed=true;
+  SND.poll();
+  const p=G.poll;
+  const chart=document.getElementById('pollChart');
+  chart.classList.add('open');
+  ['a','b','c'].forEach((k,i)=>{
+    chart.innerHTML='<div style="font-size:.65rem;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:8px;">📊 AUDIENCE VOTE</div>'+
+      ['a','b','c'].map((k,i)=>`<div class="poll-row"><div class="poll-label">${['A','B','C'][i]}</div><div class="poll-bar-wrap"><div class="poll-bar" id="pb_${k}" style="width:0%"></div></div><div class="poll-pct">${p[k]}%</div></div>`).join('')+
+      '<div class="poll-note">Random sample · 50% chance lie has highest vote</div>';
+  });
+  document.getElementById('pollBtn').textContent='📊 AUDIENCE VOTED';
+  document.getElementById('pollBtn').style.opacity='.5';
+  document.getElementById('pollBtn').style.pointerEvents='none';
+  setTimeout(()=>{
+    ['a','b','c'].forEach(k=>{
+      const el=document.getElementById('pb_'+k);
+      if(el)el.style.width=G.poll[k]+'%';
+    });
+  },100);
+  save();
+}
+
+/* ═══ ROUND START ═══ */
+function pickQ(){
+  const used=G.usedIdx[G.diff],bank=QB[G.diff];
+  const rem=bank.map((_,i)=>i).filter(i=>!used.includes(i));
+  if(!rem.length){G.usedIdx[G.diff]=[];toast('All '+G.diff.toUpperCase()+' sets used — reshuffling!','gold');return pickQ();}
+  const idx=rem[Math.floor(Math.random()*rem.length)];
+  G.usedIdx[G.diff].push(idx);G.curQIdx=idx;
+  return bank[idx];
+}
+
+function startRound(player){
+  G.curPIdx=G.players.indexOf(player);
+  player.used=true;
+  G.pAns=null;G.chalIdx=-1;G.chalAns=null;
+  G.hintUsed=false;G.hintKey=null;
+  G.phase='timer';
+  const q=pickQ();
+  G.poll=genPoll(q.lie);
+  G.pollRevealed=false;
+  clearInterval(G.timerInt);
+  G.timerVal=G.timerDur;
+  save();
+  showScreen('gameScreen');
+  updateHdr();renderStmts(true);renderActions();renderMiniLb();
+  showChal(false);
+  document.getElementById('phaseLabel').textContent=player.name+' — tap the statement you think is the LIE';
+  document.getElementById('explainBox').style.display='none';
+  // Reset poll UI
+  document.getElementById('pollChart').classList.remove('open');
+  document.getElementById('pollChart').innerHTML='';
+  document.getElementById('pollBtn').textContent='📊 REVEAL AUDIENCE VOTE';
+  document.getElementById('pollBtn').style.opacity='1';
+  document.getElementById('pollBtn').style.pointerEvents='auto';
+  document.getElementById('pollSection').style.display='block';
+  // Reset hint UI
+  document.getElementById('hintBtn').classList.remove('used');
+  document.getElementById('hintBtn').textContent='🔍 USE HINT (−30% pts)';
+  document.getElementById('hintSection').style.display='flex';
+  updateTimer();updateQProg();
+  G.timerInt=setInterval(()=>{
+    G.timerVal=Math.max(0,G.timerVal-1);
+    updateTimer();
+    if(G.timerVal<=10&&G.timerVal>0) SND.timerBeep();
+    if(G.timerVal<=0){clearInterval(G.timerInt);if(G.phase==='timer')lockAnswer();}
+  },1000);
+}
+
+function rebuildGameScreen(){
+  const pl=G.players[G.curPIdx];if(!pl){showScreen('slotScreen');doSpin();return;}
+  clearInterval(G.timerInt);
+  updateHdr();
+  if(G.pollRevealed){
+    document.getElementById('pollChart').classList.add('open');
+    setTimeout(()=>{['a','b','c'].forEach(k=>{const el=document.getElementById('pb_'+k);if(el)el.style.width=(G.poll?G.poll[k]:0)+'%';});},200);
+  }
+  const ph=G.phase;
+  if(ph==='timer'){
+    renderStmts(true);updateTimer();
+    G.timerInt=setInterval(()=>{G.timerVal=Math.max(0,G.timerVal-1);updateTimer();if(G.timerVal<=10&&G.timerVal>0)SND.timerBeep();if(G.timerVal<=0){clearInterval(G.timerInt);lockAnswer();}},1000);
+    document.getElementById('phaseLabel').textContent=pl.name+' — tap the statement you think is the LIE';
+    showChal(false);
+  }else if(ph==='locked'){
+    renderStmts(false);document.getElementById('phaseLabel').textContent=pl.name+' locked: '+(G.pAns||'?').toUpperCase();showChal(true);
+    document.getElementById('hintSection').style.display='none';
+  }else if(ph==='chal-pick'||ph==='chal-answered'){
+    renderStmts(false);showChal(ph==='chal-pick');
+    document.getElementById('hintSection').style.display='none';
+  }else if(ph==='revealed'||ph==='done'){
+    renderStmts(false);document.getElementById('phaseLabel').textContent='🔍 REVEALED!';showChal(false);
+    document.getElementById('hintSection').style.display='none';
+    const q=QB[G.diff][G.curQIdx];if(q&&q.ex){document.getElementById('explainBox').textContent='💡 '+q.ex;document.getElementById('explainBox').style.display='block';}
+  }
+  renderActions();renderMiniLb();updateQProg();
+}
+
+function updateHdr(){
+  const pl=G.players[G.curPIdx];
+  document.getElementById('roundNum').textContent=G.round;
+  document.getElementById('pcName').textContent=pl?pl.name:'—';
+  document.getElementById('pcPts').textContent=(pl?pl.pts:0)+' pts';
+  const b=document.getElementById('levelBadge');
+  b.textContent=STAGES[G.diff].name;b.className='level-badge badge-'+G.diff;
+}
+function updateTimer(){
+  const el=document.getElementById('timerDisplay');
+  el.textContent=G.timerVal;
+  el.className='timer-val '+(G.timerVal>20?'t-normal':G.timerVal>10?'t-warn':'t-danger');
+}
+function updateQProg(){
+  const u=G.usedIdx[G.diff].length,t=QB[G.diff].length;
+  document.getElementById('qsetProgress').textContent='Question '+u+' of '+t+' · '+G.diff.toUpperCase();
+}
+
+/* ═══ HINT ═══ */
+function useHint(){
+  if(G.hintUsed||G.phase!=='timer')return;
+  const q=QB[G.diff][G.curQIdx];
+  const truths=['a','b','c'].filter(k=>k!==q.lie);
+  G.hintKey=truths[Math.floor(Math.random()*truths.length)];
+  G.hintUsed=true;
+  save();SND.hint();
+  renderStmts(true);
+  document.getElementById('hintBtn').classList.add('used');
+  document.getElementById('hintBtn').textContent='🔍 HINT USED — Statement '+G.hintKey.toUpperCase()+' removed';
+  toast('💡 Hint used! Win earns only 70% points.','gold');
+}
+
+/* ═══ STATEMENTS ═══ */
+function renderStmts(sel){
+  const q=QB[G.diff][G.curQIdx];if(!q)return;
+  const el=document.getElementById('stmtsContainer');
+  const ks=['a','b','c'],ls=['A','B','C'];
+  el.innerHTML='<div class="stmt-title">'+(sel?'TAP TO SELECT THE LIE':'')+'</div>'+
+    ks.map((k,i)=>{
+      let cls='stmt',tag='';
+      const isRemoved=G.hintUsed&&G.hintKey===k;
+      if(G.phase==='revealed'||G.phase==='done'){
+        cls+=k===q.lie?' lie-r':' truth-r';
+        tag=`<div style="margin-top:5px"><span class="reveal-tag ${k===q.lie?'tag-l':'tag-t'}">${k===q.lie?'❌ THE LIE':'✅ TRUTH'}</span></div>`;
+      }else if(isRemoved){cls+=' removed';}
+      else if(sel){cls+=' selectable';if(G.pAns===k)cls+=' selected';}
+      const onclick=sel&&G.phase==='timer'&&!isRemoved?`onclick="selAns('${k}')"` :'';
+      return `<div class="${cls}" ${onclick}><div class="stmt-letter">${ls[i]}</div><div class="stmt-body"><div class="stmt-text">${q[k]}</div>${tag}</div></div>`;
+    }).join('');
+  if((G.phase==='revealed'||G.phase==='done')&&q.ex){
+    document.getElementById('explainBox').textContent='💡 '+q.ex;
+    document.getElementById('explainBox').style.display='block';
+  }
+}
+
+function selAns(k){if(G.phase!=='timer')return;G.pAns=k;renderStmts(true);renderActions();}
+
+/* ═══ ACTIONS ═══ */
+function renderActions(){
+  const el=document.getElementById('actionArea'),ph=G.phase;
+  let h='';
+  if(ph==='timer'){
+    h=`<button class="btn btn-gold btn-big btn-full" onclick="lockAnswer()" ${G.pAns?'':'style="opacity:.5"'}>🔒 LOCK ANSWER${G.pAns?' ('+G.pAns.toUpperCase()+')':''}</button>`;
+  }else if(ph==='locked'){
+    h=`<button class="btn btn-neon btn-big btn-full" onclick="skipChal()">👁 REVEAL (No Challenger)</button><div style="font-size:.7rem;color:var(--dim);text-align:center;">Or select a challenger above ↑</div>`;
+  }else if(ph==='chal-pick'){
+    h=`<div style="font-size:.85rem;color:var(--neon);text-align:center;padding:8px;font-family:'Bebas Neue',sans-serif;letter-spacing:.1em;">⚔️ WAITING FOR CHALLENGER TO PICK...</div>`;
+  }else if(ph==='chal-answered'){
+    h=`<button class="btn btn-neon btn-big btn-full" onclick="revealAnswer()">👁 REVEAL ANSWER</button>`;
+  }else if(ph==='revealed'){
+    const st=STAGES[G.diff],q=QB[G.diff][G.curQIdx];
+    const pl=G.players[G.curPIdx];
+    const pC=G.pAns===q.lie;
+    const ch=G.chalIdx>=0?G.players[G.chalIdx]:null;
+    const cC=ch?G.chalAns===q.lie:null;
+    const effPts=G.hintUsed&&pC?Math.floor(st.pts*.7):st.pts;
+    h=`<div style="padding:12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--border);margin-bottom:6px;">
+      <div style="font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;">🏆 ROUND RESULT</div>
+      <div style="font-size:1rem;font-weight:700;color:${pC?'var(--green)':'var(--red)'};">
+        ${pl.name}: ${pC?'✅ CORRECT'+(G.hintUsed?' (HINT PENALTY: +'+effPts+' pts)':' +'+st.pts+' pts'):'❌ WRONG — No points'}
+      </div>
+      ${ch?`<div style="font-size:1rem;font-weight:700;color:${cC?'var(--green)':'var(--red)'};margin-top:6px;">
+        ⚔️ ${ch.name}: ${cC?'🏆 CHALLENGER WINS! +'+st.cP+' pts':'💀 CHALLENGER FAILS! −'+st.cF+' pts'}
+      </div>`:''}
+    </div>
+    <button class="btn btn-fire btn-big btn-full" onclick="award()">✅ AWARD & NEXT PLAYER</button>`;
+  }
+  el.innerHTML=h;
+}
+
+function lockAnswer(){
+  if(!G.pAns){const o=['a','b','c'];G.pAns=o[Math.floor(Math.random()*3)];toast("Time's up! Random answer assigned",'error');}
+  clearInterval(G.timerInt);
+  G.phase='locked';save();
+  document.getElementById('hintSection').style.display='none';
+  document.getElementById('pollSection').style.display='none';
+  renderStmts(false);
+  document.getElementById('phaseLabel').textContent=G.players[G.curPIdx].name+' locked: '+G.pAns.toUpperCase();
+  showChal(true);renderActions();
+}
+
+/* ═══ CHALLENGER ═══ */
+function showChal(show){
+  const sec=document.getElementById('chalSection');
+  if(!show){sec.classList.remove('show');return;}
+  sec.classList.add('show');
+  const ch=G.chalIdx>=0?G.players[G.chalIdx]:null;
+  const av=G.players.filter((p,i)=>i!==G.curPIdx&&p.chalCount<2);
+  const chips=document.getElementById('chalChips');
+  if(!av.length){chips.innerHTML='<div style="color:var(--dim);font-size:.76rem;">No available challengers (max 2 per player)</div>';}
+  else{chips.innerHTML=av.map(p=>`<button class="chal-chip ${ch===p?'sel':''}" onclick="pickChal('${escQ(p.name)}')">${p.name} <span style="font-size:.6rem;opacity:.5;">(${p.chalCount}/2)</span></button>`).join('');}
+  const caa=document.getElementById('chalAnswerArea');
+  if(ch&&G.phase==='chal-pick'){
+    caa.classList.add('show');
+    document.getElementById('chalNameLabel').textContent=ch.name;
+    const q=QB[G.diff][G.curQIdx];
+    const ks=['a','b','c'],ls=['A','B','C'];
+    document.getElementById('chalStmts').innerHTML=ks.map((k,i)=>`<div class="stmt selectable ${G.chalAns===k?'selected':''}" onclick="selChal('${k}')"><div class="stmt-letter">${ls[i]}</div><div class="stmt-body"><div class="stmt-text">${q[k]}</div></div></div>`).join('');
+  }else{caa.classList.remove('show');}
+}
+
+function pickChal(name){
+  const p=G.players.find(pl=>pl.name===name);if(!p||p.chalCount>=2)return;
+  G.chalIdx=G.players.indexOf(p);p.chalCount++;
+  G.phase='chal-pick';G.chalAns=null;save();
+  SND.challenge();
+  document.getElementById('phaseLabel').textContent='⚔️ '+p.name+' — pick the LIE!';
+  showChal(true);renderActions();
+  toast('⚔️ '+name+' is CHALLENGING!','gold');
+}
+function selChal(k){
+  if(G.phase!=='chal-pick')return;
+  G.chalAns=k;G.phase='chal-answered';save();
+  document.getElementById('phaseLabel').textContent=G.players[G.chalIdx].name+' locked answer!';
+  showChal(true);renderActions();
+}
+function skipChal(){G.phase='chal-answered';revealAnswer();}
+function revealAnswer(){
+  clearInterval(G.timerInt);G.phase='revealed';save();
+  renderStmts(false);document.getElementById('phaseLabel').textContent='🔍 REVEALED!';
+  showChal(false);renderActions();
+}
+
+/* ═══ AWARD ═══ */
+function award(){
+  const st=STAGES[G.diff];
+  const q=QB[G.diff][G.curQIdx];
+  const pl=G.players[G.curPIdx];
+  const pC=G.pAns===q.lie;
+  const ch=G.chalIdx>=0?G.players[G.chalIdx]:null;
+  const cC=ch?G.chalAns===q.lie:null;
+
+  G.deltas={};
+
+  if(pC){
+    if(G.hintUsed){
+      // Show hammer animation, then apply reduced score
+      const full=st.pts;
+      const reduced=Math.floor(st.pts*.7);
+      showHammer(full,reduced,()=>{
+        pl.pts+=reduced;
+        G.deltas[pl.name]='+'+reduced+' (hint)';
+        if(ch){applyChallenger(ch,cC,st);}
+        finishAward();
+      });
+      return;
+    }else{
+      pl.pts+=st.pts;
+      G.deltas[pl.name]='+'+st.pts;
+      sFlash('+'+st.pts,true);SND.correct();
+    }
+  }else{
+    G.deltas[pl.name]='0';
+    SND.wrong();
+  }
+
+  if(ch){applyChallenger(ch,cC,st);}
+  finishAward();
+}
+
+function applyChallenger(ch,cC,st){
+  if(cC){
+    ch.pts+=st.cP;
+    G.deltas[ch.name]='+'+st.cP;
+    showChalResult(true,ch.name,'+'+st.cP);
+    SND.chalWin();
+  }else{
+    ch.pts=Math.max(0,ch.pts-st.cF);
+    G.deltas[ch.name]='-'+st.cF;
+    showChalResult(false,ch.name,'-'+st.cF);
+    SND.chalLose();
+  }
+}
+
+function finishAward(){
+  const pl=G.players[G.curPIdx];
+  document.getElementById('pcPts').textContent=pl.pts+' pts';
+  renderMiniLb();
+  G.phase='done';save();renderActions();
+  setTimeout(()=>{
+    const av=G.players.filter(p=>!p.used);
+    if(!av.length)showLeaderboard();
+    else{showScreen('slotScreen');doSpin();}
+  },2800);
+}
+
+/* ═══ HAMMER ANIMATION ═══ */
+function showHammer(full,reduced,onDone){
+  const ov=document.getElementById('hammerOverlay');
+  ov.classList.add('show');
+  document.getElementById('hammerScore').textContent='+'+full;
+  document.getElementById('hammerScore').style.color='var(--gold)';
+  document.getElementById('hammerEmoji').style.display='none';
+  document.getElementById('hammerNew').style.display='none';
+  document.getElementById('hammerDesc').textContent='You used the HINT — 30% deducted';
+
+  setTimeout(()=>{
+    SND.hammer();
+    const em=document.getElementById('hammerEmoji');
+    em.style.display='block';
+    em.classList.remove('swing');
+    void em.offsetWidth;
+    em.classList.add('swing');
+
+    setTimeout(()=>{
+      const sc=document.getElementById('hammerScore');
+      sc.textContent='+'+reduced;
+      sc.style.color='var(--fire)';
+      sc.classList.add('hammer-crack');
+      document.getElementById('hammerNew').textContent='FINAL: +'+reduced+' pts';
+      document.getElementById('hammerNew').style.display='block';
+      sFlash('+'+reduced,true);SND.correct();
+
+      setTimeout(()=>{
+        ov.classList.remove('show');
+        onDone();
+      },1800);
+    },500);
+  },1500);
+}
+
+/* ═══ CHALLENGER RESULT OVERLAY ═══ */
+function showChalResult(won,name,pts){
+  const ov=document.getElementById('chalResultOverlay');
+  document.getElementById('crIcon').textContent=won?'⚔️🏆':'⚔️💀';
+  document.getElementById('crTitle').textContent=won?'CHALLENGER WINS!':'CHALLENGER FAILS!';
+  document.getElementById('crTitle').style.color=won?'var(--green)':'var(--red)';
+  document.getElementById('crSub').textContent=name+(won?' GAINS ':' LOSES ')+Math.abs(parseInt(pts))+' POINTS';
+  document.getElementById('crPts').textContent=pts;
+  document.getElementById('crPts').style.color=won?'var(--green)':'var(--red)';
+  ov.classList.add('show');
+  setTimeout(()=>ov.classList.remove('show'),2600);
+}
+
+/* ═══ LIVE LEADERBOARD ═══ */
+function renderMiniLb(){
+  const sorted=[...G.players].sort((a,b)=>b.pts-a.pts);
+  const me=['🥇','🥈','🥉'],rc=['r1','r2','r3'],rg=['g','s','b'];
+  const pl=G.players[G.curPIdx];
+  document.getElementById('miniLb').innerHTML=sorted.slice(0,6).map((p,i)=>{
+    const delta=G.deltas[p.name];
+    const deltaBadge=delta&&delta!=='0'?`<span class="lb-delta ${delta.startsWith('+')?'delta-pos':'delta-neg'}">${delta}</span>`:'';
+    return `<div class="lb-item ${rc[i]||''}"><div class="lb-rank ${rg[i]||''}">${me[i]||'#'+(i+1)}</div><div class="lb-name">${p.name}${pl===p?' 🎯':''}</div><div class="lb-pts">${p.pts}${deltaBadge}</div></div>`;
+  }).join('');
+}
+
+/* ═══ LEADERBOARD ═══ */
+function showLeaderboard(){
+  showScreen('lbScreen');clearInterval(G.timerInt);G.phase='idle';save();
+  const sorted=[...G.players].sort((a,b)=>b.pts-a.pts);
+  const me=['🥇','🥈','🥉'],cl=['lbf1','lbf2','lbf3'];
+  document.getElementById('lbFullList').innerHTML=sorted.map((p,i)=>`
+    <div class="lb-full-item ${cl[i]||''}">
+      <div class="lbf-rank">${me[i]||'#'+(i+1)}</div>
+      <div><div class="lbf-name">${p.name}</div><div style="font-size:.62rem;color:var(--dim);">Challenges: ${p.chalCount}</div></div>
+      <div class="lbf-pts">${p.pts}</div>
+    </div>`).join('');
+}
+function nextRound(){G.players.forEach(p=>{p.used=false;p.chalCount=0;});G.round=0;G.deltas={};save();showScreen('slotScreen');doSpin();}
+function resetGameFull(){
+  if(!confirm('Reset everything?'))return;
+  localStorage.removeItem(LS);
+  Object.assign(G,{players:[],usedIdx:{easy:[],medium:[],hard:[],extreme:[]},round:0,phase:'idle',curPIdx:-1,deltas:{}});
+  clearInterval(G.timerInt);showScreen('setupScreen');renderSetupPlayers();
+  document.getElementById('savedCard').style.display='none';
+}
+
+/* ═══ FORM / CSV ═══ */
+async function submitAllToForm(){
+  if(!G.formUrl){toast('No form URL!','error');return;}
+  const s=[...G.players].sort((a,b)=>b.pts-a.pts);
+  for(let i=0;i<s.length;i++){
+    const p=s[i],fd=new FormData();
+    fd.append('entry.1',p.name);fd.append('entry.2',p.pts.toString());fd.append('entry.3','#'+(i+1));
+    try{await fetch(G.formUrl,{method:'POST',body:fd,mode:'no-cors'});}catch(e){}
+    await new Promise(r=>setTimeout(r,300));
+  }
+  toast('Submitted '+s.length+' players!','neon');
+}
+function exportCSV(){
+  const s=[...G.players].sort((a,b)=>b.pts-a.pts);
+  const rows=['Rank,Name,Points,Challenges'];
+  s.forEach((p,i)=>rows.push(`${i+1},${p.name},${p.pts},${p.chalCount}`));
+  const b=new Blob([rows.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='2Truths1Lie.csv';a.click();
+  toast('CSV exported!','neon');
+}
+
+/* ═══ UTILS ═══ */
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function sFlash(txt,pos){
+  const el=document.getElementById('scoreFlash'),t=document.getElementById('sfText');
+  t.textContent=txt;t.className='sf-text '+(pos?'sf-plus':'sf-minus');
+  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),950);
+}
+let tT;
+function toast(msg,type='success'){
+  const el=document.getElementById('toast'),inn=document.getElementById('toastInner');
+  inn.textContent=msg;
+  const c={error:'rgba(255,0,60,.92)',gold:'rgba(200,160,0,.95)',neon:'rgba(0,180,160,.92)',success:'rgba(0,180,70,.92)'};
+  const tx={gold:'#000',neon:'#000'};
+  inn.style.background=c[type]||c.success;inn.style.color=tx[type]||'#fff';
+  el.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>el.classList.remove('show'),2500);
+}
+function escQ(s){return s.replace(/'/g,"\\'");}
+
+/* ═══ INIT ═══ */
+(function(){
+  const ok=load();
+  if(ok&&G.players.length>0){
+    document.getElementById('savedCard').style.display='block';
+    ['easy','medium','hard','extreme'].forEach(x=>document.getElementById('d-'+x).classList.toggle('on',x===G.diff));
+    renderSetupPlayers();
+    document.getElementById('timerSec').value=G.timerDur||60;
+    document.getElementById('formUrl').value=G.formUrl||'';
+  }
+  // Init audio context on first tap
+  document.addEventListener('touchstart',()=>ac(),{once:true,passive:true});
+  document.addEventListener('click',()=>ac(),{once:true});
+})();
+</script>
+</body>
+</html>
