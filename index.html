@@ -742,7 +742,16 @@ function pickQ(){
   if(!rem.length){G.usedIdx[G.diff]=[];toast('All '+G.diff.toUpperCase()+' sets used — reshuffling!','gold');return pickQ();}
   const idx=rem[Math.floor(Math.random()*rem.length)];
   G.usedIdx[G.diff].push(idx);G.curQIdx=idx;
-  return bank[idx];
+  const q=bank[idx];
+  // Shuffle a/b/c so lie is not always position C
+  const keys=['a','b','c'];
+  const vals=[q.a,q.b,q.c];
+  const lieVal=q[q.lie];
+  for(let i=keys.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[vals[i],vals[j]]=[vals[j],vals[i]];}
+  const shuffled={a:vals[0],b:vals[1],c:vals[2],ex:q.ex};
+  shuffled.lie=vals.indexOf(lieVal)===0?'a':vals.indexOf(lieVal)===1?'b':'c';
+  bank[idx]=shuffled;
+  return shuffled;
 }
 
 function startRound(player){
